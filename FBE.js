@@ -1,27 +1,27 @@
 var FBE_Factory = {
   listEntry: function(id, subject, predicate, object) {
-    var html = '        <form class="form-inline" id="feedbackModal_list_entry'+id+'">' +
+    var html = '        <form class="form-inline" id="feedbackModal_list_entry' + id + '">' +
       '         <div class="form-group">' +
-      '             <input type="text" class="form-control" value="'+subject+'" readonly>' +
+      '             <input type="text" class="form-control" value="' + subject + '" readonly>' +
       '         </div>' +
       '         &nbsp;&nbsp;' +
       '         <div class="form-group">' +
-      '             <input type="text" class="form-control" value="'+predicate+'" readonly>' +
+      '             <input type="text" class="form-control" value="' + predicate + '" readonly>' +
       '         </div>' +
       '         &nbsp;&nbsp;' +
       '         <div class="form-group">' +
-      '             <input type="text" class="form-control" value="'+object+'" readonly>' +
+      '             <input type="text" class="form-control" value="' + object + '" readonly>' +
       '         </div>' +
-      '        </form>'+
-      '        <button onclick="FBE_Handler.onButtonClicked_ChangeTriple('+id+')" style="display: inline-block;">&Auml;ndern</button>';
+      '        </form>' +
+      '        <button onclick="FBE_Handler.onButtonClicked_ChangeTriple(' + id + ')" style="display: inline-block;">&Auml;ndern</button>';
 
-      return html;
+    return html;
   }
 };
 
 var FBE_Handler = {
   onButtonClicked_ChangeTriple: function(id) {
-    console.log("clocked on Changing "+id);
+    console.log("clocked on Changing " + id);
   }
 };
 
@@ -43,17 +43,28 @@ var FBE = {
   },
 
   createFeedbackModal: function() {
-    var modal = '<div id="feedbackModal" class="modal fade" tabindex="-1" role="dialog" style="width: 100% !important;">' +
-      '  <div class="modal-dialog modal-lg" style="width: 100% !important;">' +
+    var modal = '<div id="feedbackModal" class="modal fade" tabindex="-1" role="dialog">' +
+      '  <div class="modal-dialog modal-lg">' +
       '    <div class="modal-content">' +
       '      <div class="modal-header">' +
       '        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>' +
       '        <h4 class="modal-title">Modal Title</h4>' +
       '      </div>' +
       '      <div class="modal-body">' +
-      '        <p>Content</p>' +
-      '        <hr>' +
+      '        <div class="progress progress-striped active">' +
+      '         <div class="progress-bar" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width: 100%"></div>' +
+      '        </div>' +
       '        <div id="feedbackModal_list"></div>' +
+      '        <hr>' +
+      '        <form id="feedbackForm" class="form-inline">' +
+      '         <p class="help-block">Please input your Credentials.</p>' +
+      '         <div class="form-group">' +
+      '           <input id="feedbackFormAuthor" type="email" class="form-control" placeholder="Your E-Mail" required>' +
+      '         </div>' +
+      '         <div class="form-group">' +
+      '           <input id="feedbackFormMessage" type="text" class="form-control" placeholder="Your Message" >' +
+      '         </div>' +
+      '        </form>' +
       '      </div>' +
       '      <div class="modal-footer">' +
       '       <button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>' +
@@ -69,7 +80,7 @@ var FBE = {
       angular.bootstrap(document);
     });
 
-    $("#feedbackForm").submit(FBE.sendFeedback);
+    $("#feedbackForm").submit(FBE.createCommit);
     $("#feedbackModal").on('show.bs.modal', FBE.fillFeedbackModal);
   },
 
@@ -83,7 +94,6 @@ var FBE = {
     FBE.getTriples(resource);
 
     modal.find('.modal-title').text('Feedback on Ressource ' + $(document).find("title").text());
-    //TODO fill in rdf content
   },
 
   getTriples: function(resource) {
@@ -104,38 +114,38 @@ var FBE = {
   //Transforms RDF JSON from DBPedia to an object for the list view
   parseNewTriples: function(data, ressourceName) {
     var prepareRDFJSONForListView = function(json, ressourceName) {
-        if (json === undefined || json === null || json.length < 1 || json == {})
-          return [];
+      if (json === undefined || json === null || json.length < 1 || json == {})
+        return [];
 
-        var object = getNeededRessourceFromRDF(json, ressourceName);
+      var object = getNeededRessourceFromRDF(json, ressourceName);
 
-        var result = [];
-        for (var key in object){
-            var entryList = object[key];
-            entryList.forEach(function(entry) {
-                result.push({
-                    subject: key,
-                    predicate: entry.type,
-                    object_: entry.value
-                });
-            });
-        }
+      var result = [];
+      for (var key in object) {
+        var entryList = object[key];
+        entryList.forEach(function(entry) {
+          result.push({
+            subject: key,
+            predicate: entry.type,
+            object_: entry.value
+          });
+        });
+      }
 
-        return {
-            name: ressourceName,
-            triples: result
-        };
+      return {
+        name: ressourceName,
+        triples: result
+      };
     };
 
     var getNeededRessourceFromRDF = function(json, ressourceName) {
-        var ressource = json["http://de.wikipedia.org/wiki/" + ressourceName];
-        return json[ressource["http://xmlns.com/foaf/0.1/primaryTopic"][0].value];
+      var ressource = json["http://de.wikipedia.org/wiki/" + ressourceName];
+      return json[ressource["http://xmlns.com/foaf/0.1/primaryTopic"][0].value];
     };
 
     if (data === undefined || data === null || data == {})
       return;
 
-    var result = prepareRDFJSONForListView(data, "Gegenteil");//ressourceName);
+    var result = prepareRDFJSONForListView(data, "Gegenteil"); //ressourceName);
 
     console.log("parsed RDF JSON:");
     console.log(result);
@@ -150,36 +160,42 @@ var FBE = {
     $("#feedbackModal_list").append(newListEntrys);
   },
 
-  sendFeedback: function(event) {
+  createCommit: function(event) {
     event.preventDefault();
-    var parser = N3.Parser({
-      format: 'application/trig'
-    });
+    var triples = [],
+      parser = N3.Parser({
+        format: 'application/trig'
+      });
+    //TODO Look for naming and hashing
     parser.parse('@prefix ex: <http://example.org/feedback#>.\n' +
-      '@prefix eccrev: <https://vocab.eccenca.com/revision/>.\n' +
-      '@prefix prov: <http://www.w3.org/ns/prov#>.\n' +
-      '@prefix xsd: <http://www.w3.org/2001/XMLSchema#>.\n' +
-      'ex:patch-9999999 a eccrev:Commit;\n' +
-      'eccrev:commitAuthor ex:' + $("#feedbackFormAuthor").val() + ';\n' +
-      'eccrev:commitMessage "' + $("#feedbackFormMessage").val() + '";\n' +
-      'prov:atTime "' + new Date().toISOString() + '"^^xsd:dateTime;\n' + //Format: 2015-12-17T13:37:00+01:00
-      'eccrev:sha256 "9999999"^^xsd:base64Binary;\n' +
-      'eccrev:deltaDelete ex:delete-9999999;\n' +
-      'eccrev:deltaInsert ex:insert-9999999.',
+      '           @prefix eccrev: <https://vocab.eccenca.com/revision/>.\n' +
+      '           @prefix prov: <http://www.w3.org/ns/prov#>.\n' +
+      '           @prefix xsd: <http://www.w3.org/2001/XMLSchema#>.\n' +
+      '           ex:patch-9999999 a eccrev:Commit;\n' +
+      '                            eccrev:commitAuthor ex:' + $("#feedbackFormAuthor").val() + ';\n' +
+      '                            eccrev:commitMessage "' + $("#feedbackFormMessage").val() + '";\n' +
+      '                            prov:atTime "' + new Date().toISOString() + '"^^xsd:dateTime;\n' + //Format: 2015-12-17T13:37:00+01:00
+      '                            eccrev:sha256 "9999999"^^xsd:base64Binary;\n' +
+      '                            eccrev:deltaDelete ex:delete-9999999;\n' +
+      '                            eccrev:deltaInsert ex:insert-9999999.',
       function(error, triple, prefixes) {
         if (triple)
-          console.log(triple.subject, triple.predicate, triple.object, '.');
+          triples.push(triple);
         else
-          console.log("# That's all, folks!", prefixes);
+          FBE.sendFeedback(triples);
       });
+  },
+
+  sendFeedback: function(triples) {
+    console.log(triples);
     var writer = N3.Writer({
       format: 'application/trig'
     });
-    /*writer.addTriples(getDiff());
-    //TODO add infos
+    writer.addTriples(triples);
     writer.end(function(error, result) {
-      console.log(result + " " + error);
-    });*/
+      if (!error)
+        console.log(result);
+    });
   },
 
   getDiff: function() {
