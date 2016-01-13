@@ -1,19 +1,22 @@
 var FBE_Factory = {
   listEntry: function(id, subject, predicate, object) {
-    var html = '        <form class="form-inline" id="feedbackModal_list_entry' + id + '">' +
+    var html = '        <div>' +
+      '        <form class="form-inline" id="feedbackModal_list_entry' + id + '" style="display: inline-block;">' +
       '         <div class="form-group">' +
-      '             <input type="text" class="form-control" value="' + subject + '" readonly>' +
+      '             <input type="text" class="form-control pred-value" value="' + subject + '" readonly>' +
       '         </div>' +
       '         &nbsp;&nbsp;' +
       '         <div class="form-group">' +
-      '             <input type="text" class="form-control" value="' + predicate + '" readonly>' +
+      '             <input type="text" class="form-control pred-value" value="' + predicate + '" readonly>' +
       '         </div>' +
       '         &nbsp;&nbsp;' +
       '         <div class="form-group">' +
-      '             <input type="text" class="form-control" value="' + object + '" readonly>' +
+      '             <input type="text" class="form-control pred-value" value="' + object + '" readonly>' +
       '         </div>' +
       '        </form>' +
-      '        <button onclick="FBE_Handler.onButtonClicked_ChangeTriple(' + id + ')" style="display: inline-block;">&Auml;ndern</button>';
+      '         &nbsp;&nbsp;' +
+      '        <button onclick="FBE_Handler.onButtonClicked_ChangeTriple(' + id + ')" class="btn btn-default dropdown-toggle feedbackbtn" style="display: inline-block;">&Auml;ndern</button>'+
+      '        </div>';
 
     return html;
   }
@@ -57,7 +60,7 @@ var FBE = {
       '        <div id="feedbackModal_list"></div>' +
       '        <hr>' +
       '        <form id="feedbackForm" class="form-inline">' +
-      '         <p class="help-block">Please input your Credentials.</p>' +
+      '         <p class="help-block rdf-prefix feedbacktext">Please input your Credentials.</p>' +
       '         <div class="form-group">' +
       '           <input id="feedbackFormAuthor" type="email" class="form-control" placeholder="Your E-Mail" required>' +
       '         </div>' +
@@ -67,8 +70,8 @@ var FBE = {
       '        </form>' +
       '      </div>' +
       '      <div class="modal-footer">' +
-      '       <button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>' +
-      '       <button id="feedbackModalSave" type="submit" form="feedbackForm" class="btn btn-success">Save changes</button>' +
+      '       <button type="button" class="btn btn-primary feedbackbtn" data-dismiss="modal">Close</button>' +
+      '       <button id="feedbackModalSave" type="submit" form="feedbackForm" class="btn btn-success feedbackbtn">Save changes</button>' +
       '      </div>' +
       '    </div>' +
       '  </div>' +
