@@ -19,7 +19,7 @@ var FBE = {
   createFeedbackModal: function() {
     var modal = '<div id="feedbackModal" class="modal fade" tabindex="-1" role="dialog">' +
       '  <div class="modal-dialog modal-lg">' +
-      '    <div class="modal-content">' +
+        '    <div class="modal-content" ng-controller="ModalController">{{dummy}}' +
       '      <div class="modal-header">' +
       '        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>' +
       '        <h4 class="modal-title">Modal Title</h4>' +
@@ -45,6 +45,12 @@ var FBE = {
       '  </div>' +
       '</div>';
     $("body").append(modal);
+      
+    //Restart AngularJS
+    angular.element(document).ready(function() {
+      angular.bootstrap(document);
+    });
+      
     $("feedbackModalSave").submit(FBE.sendFeedback);
     $("#feedbackModal").on('show.bs.modal', FBE.fillFeedbackModal);
   },
@@ -56,7 +62,7 @@ var FBE = {
     console.log(url);*/
     var resource = $(document).find("title").text();
     FBE.getTriples(resource);
-    modal.find('.modal-title').text('Feedback on Resource ' + $(document).find("title").text());
+    modal.find('.modal-title').text('Feedback on Ressource ' + $(document).find("title").text());
     //TODO fill in rdf content
   },
 
@@ -83,3 +89,12 @@ var FBE = {
 $(document).ready(function() {
   FBE.addFeedbackButton();
 });
+
+
+var FBE_A = angular.module("LDOW2016PF", []);
+FBE_A.run(function($rootScope) {
+    $rootScope.dummy = "";
+});
+function ModalController($scope) {
+    $scope.dummy = "myDummy";
+};
