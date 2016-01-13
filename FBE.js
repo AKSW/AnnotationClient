@@ -1,3 +1,30 @@
+var FBE_Factory = {
+  listEntry: function(id, subject, predicate, object) {
+    var html = '        <form class="form-inline" id="feedbackModal_list_entry'+id+'">' +
+      '         <div class="form-group">' +
+      '             <input type="text" class="form-control" value="'+subject+'" readonly>' +
+      '         </div>' +
+      '         &nbsp;&nbsp;' +
+      '         <div class="form-group">' +
+      '             <input type="text" class="form-control" value="'+predicate+'" readonly>' +
+      '         </div>' +
+      '         &nbsp;&nbsp;' +
+      '         <div class="form-group">' +
+      '             <input type="text" class="form-control" value="'+object+'" readonly>' +
+      '         </div>' +
+      '        </form>'+
+      '        <button onclick="FBE_Handler.onButtonClicked_ChangeTriple('+id+')" style="display: inline-block;">&Auml;ndern</button>';
+
+      return html;
+  }
+};
+
+var FBE_Handler = {
+  onButtonClicked_ChangeTriple: function(id) {
+    console.log("clocked on Changing "+id);
+  }
+};
+
 var FBE = {
   addFeedbackButton: function() {
     // TODO change this button to a hover button that resides at the left edge of the screen
@@ -17,9 +44,9 @@ var FBE = {
   },
 
   createFeedbackModal: function() {
-    var modal = '<div id="feedbackModal" class="modal fade" tabindex="-1" role="dialog">' +
-      '  <div class="modal-dialog modal-lg">' +
-      '    <div class="modal-content" ng-controller="ModalController">{{dummy}}' +
+    var modal = '<div id="feedbackModal" class="modal fade" tabindex="-1" role="dialog" style="width: 100% !important;">' +
+      '  <div class="modal-dialog modal-lg" style="width: 100% !important;">' +
+      '    <div class="modal-content">' +
       '      <div class="modal-header">' +
       '        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>' +
       '        <h4 class="modal-title">Modal Title</h4>' +
@@ -27,15 +54,7 @@ var FBE = {
       '      <div class="modal-body">' +
       '        <p>Content</p>' +
       '        <hr>' +
-      '        <form id="feedbackForm" class="form-inline">' +
-      '         <p class="help-block">Please input your Credentials.</p>' +
-      '         <div class="form-group">' +
-      '             <input id="feedbackFormAuthor" type="email" class="form-control" placeholder="Your E-Mail" >' +
-      '         </div>' +
-      '         <div class="form-group">' +
-      '             <input id="feedbackFormMessage" type="text" class="form-control" placeholder="Your Message" >' +
-      '         </div>' +
-      '        </form>' +
+      '        <div id="feedbackModal_list"></div>' +
       '      </div>' +
       '      <div class="modal-footer">' +
       '       <button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>' +
@@ -60,8 +79,10 @@ var FBE = {
     var modal = $(this);
     /*var url = document.URL;
     console.log(url);*/
+
     var resource = $(document).find("title").text();
-    //FBE.getTriples(resource);
+    FBE.getTriples(resource);
+
     modal.find('.modal-title').text('Feedback on Ressource ' + $(document).find("title").text());
     //TODO fill in rdf content
   },
@@ -71,10 +92,63 @@ var FBE = {
     $.get("./" + resource + ".n3")
       .done(function(data, text, jqxhr) {
         console.log(data);
+
+        FBE.parseNewTriples(data, resource);
       })
       .fail(function(jqxhr, textStatus, error) {
         console.log(textStatus + " " + error);
+
+        FBE.parseNewTriples(Gegenteil_JSON, resource);
       });
+  },
+
+  //Transforms RDF JSON from DBPedia to an object for the list view
+  parseNewTriples: function(data, ressourceName) {
+    var prepareRDFJSONForListView = function(json, ressourceName) {
+        if (json === undefined || json === null || json.length < 1 || json == {})
+          return [];
+
+        var object = getNeededRessourceFromRDF(json, ressourceName);
+
+        var result = [];
+        for (var key in object){
+            var entryList = object[key];
+            entryList.forEach(function(entry) {
+                result.push({
+                    subject: key,
+                    predicate: entry.type,
+                    object_: entry.value
+                });
+            });
+        }
+
+        return {
+            name: ressourceName,
+            triples: result
+        };
+    };
+
+    var getNeededRessourceFromRDF = function(json, ressourceName) {
+        var ressource = json["http://de.wikipedia.org/wiki/" + ressourceName];
+        return json[ressource["http://xmlns.com/foaf/0.1/primaryTopic"][0].value];
+    };
+
+    if (data === undefined || data === null || data == {})
+      return;
+
+    var result = prepareRDFJSONForListView(data, "Gegenteil");//ressourceName);
+
+    console.log("parsed RDF JSON:");
+    console.log(result);
+
+    var newListEntrys = "";
+    var i = 1;
+    result.triples.forEach(function(element) {
+      newListEntrys += FBE_Factory.listEntry(i, element.subject, element.predicate, element.object_) + "<br>";
+      i++;
+    });
+
+    $("#feedbackModal_list").append(newListEntrys);
   },
 
   sendFeedback: function(event) {
@@ -119,13 +193,3 @@ var FBE = {
 $(document).ready(function() {
   FBE.addFeedbackButton();
 });
-
-
-var FBE_A = angular.module("LDOW2016PF", []);
-FBE_A.run(function($rootScope) {
-  $rootScope.dummy = "";
-});
-
-function ModalController($scope) {
-  $scope.dummy = "myDummy";
-}
