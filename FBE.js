@@ -27,8 +27,7 @@ var FBE_Handler = {
 
 var FBE = {
   addFeedbackButton: function() {
-    // TODO change this button to a hover button that resides at the left edge of the screen
-    var button = '<button id="feedbackButton" type="button" class="btn btn-primary">Feedback</button>';
+    var button = '<button id="feedbackButton" type="button" class="btn btn-primary">Give Feedback</button>';
     $("body").append(button);
     $("#feedbackButton").click(FBE.openFeedbackModal);
   },
