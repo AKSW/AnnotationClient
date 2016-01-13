@@ -185,7 +185,7 @@ var FBE = {
       '                            eccrev:commitAuthor ex:' + $("#feedbackFormAuthor").val() + ';\n' +
       '                            eccrev:commitMessage "' + $("#feedbackFormMessage").val() + '";\n' +
       '                            prov:atTime "' + new Date().toISOString() + '"^^xsd:dateTime;\n' + //Format: 2015-12-17T13:37:00+01:00
-      '                            eccrev:sha256 "9999999"^^xsd:base64Binary;\n' +
+      '                            eccrev:sha256 "9999999"^^xsd:base64Binary;\n' + //TODO SHA256 Calc: var digest_hex = SHA256_hash("abc");
       '                            eccrev:deltaDelete ex:delete-9999999;\n' +
       '                            eccrev:deltaInsert ex:insert-9999999.',
       function(error, triple, prefixes) {
