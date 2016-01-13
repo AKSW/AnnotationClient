@@ -51,7 +51,7 @@ var FBE = {
       '        <h4 class="modal-title">Modal Title</h4>' +
       '      </div>' +
       '      <div class="modal-body">' +
-      '        <div class="progress progress-striped active">' +
+      '        <div class="progress progress-striped active" id="feedbackModal_progressbar">' +
       '         <div class="progress-bar" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width: 100%"></div>' +
       '        </div>' +
       '        <div id="feedbackModal_list"></div>' +
@@ -107,7 +107,11 @@ var FBE = {
       .fail(function(jqxhr, textStatus, error) {
         console.log(textStatus + " " + error);
 
+        //has to be removed - show error
         FBE.parseNewTriples(Gegenteil_JSON, resource);
+
+        //hide progress bar
+        //$("#feedbackModal_progressbar").hide();
       });
   },
 
@@ -158,6 +162,9 @@ var FBE = {
     });
 
     $("#feedbackModal_list").append(newListEntrys);
+
+    //hide progress bar
+    $("#feedbackModal_progressbar").hide();
   },
 
   createCommit: function(event) {
