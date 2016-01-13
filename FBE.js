@@ -1,21 +1,22 @@
 var FBE_Factory = {
   listEntry: function(id, subject, predicate, object) {
     var html = '        <div>' +
-      '        <form class="form-inline" id="feedbackModal_list_entry' + id + '" style="display: inline-block;">' +
-      '         <div class="form-group">' +
+      '        <form class="form-inline" id="feedbackModal_list_entry' + id + '" style="display: inline-block; width: 92%">' +
+      '         <div class="form-group" style="width: 39%">' +
       '             <input type="text" class="form-control pred-value" value="' + subject + '" readonly>' +
       '         </div>' +
       '         &nbsp;&nbsp;' +
-      '         <div class="form-group">' +
+      '         <div class="form-group" style="width: 20%">' +
       '             <input type="text" class="form-control pred-value" value="' + predicate + '" readonly>' +
       '         </div>' +
       '         &nbsp;&nbsp;' +
-      '         <div class="form-group">' +
+      '         <div class="form-group" style="width: 39%">' +
       '             <input type="text" class="form-control pred-value" value="' + object + '" readonly>' +
       '         </div>' +
       '        </form>' +
       '         &nbsp;&nbsp;' +
-      '        <button onclick="FBE_Handler.onButtonClicked_ChangeTriple(' + id + ')" class="btn btn-default dropdown-toggle feedbackbtn" style="display: inline-block;">&Auml;ndern</button>'+
+      '        <button id="feedbackModal_list_entry_changeBtn' + id + '" onclick="FBE_Handler.onButtonClicked_ChangeTriple(' + id + ')" class="btn btn-default dropdown-toggle feedbackbtn" style="display: inline-block;">&Auml;ndern</button>'+
+      '        <button id="feedbackModal_list_entry_saveBtn' + id + '" onclick="FBE_Handler.onButtonClicked_SaveTriple(' + id + ')" class="btn btn-default dropdown-toggle feedbackbtn" style="display: none;"">Speichern</button>'+
       '        </div>';
 
     return html;
@@ -24,7 +25,24 @@ var FBE_Factory = {
 
 var FBE_Handler = {
   onButtonClicked_ChangeTriple: function(id) {
-    console.log("clocked on Changing " + id);
+    console.log("clicked on changing triple" + id);
+
+    //change hidden and readonly attributes
+    $("#feedbackModal_list_entry"+id+" > div > input").prop("readonly", false);
+    $("#feedbackModal_list_entry_changeBtn"+id).hide();
+    $("#feedbackModal_list_entry_saveBtn"+id).show();
+  },
+
+  onButtonClicked_SaveTriple: function(id) {
+    console.log("clicked on saving triple " + id);
+
+    //safe changes
+
+
+    //change hidden and readonly attributes
+    $("#feedbackModal_list_entry"+id+" > div > input").prop("readonly", true);
+    $("#feedbackModal_list_entry_changeBtn"+id).show();
+    $("#feedbackModal_list_entry_saveBtn"+id).hide();
   }
 };
 
@@ -60,7 +78,7 @@ var FBE = {
       '        <div id="feedbackModal_list"></div>' +
       '        <hr>' +
       '        <form id="feedbackForm" class="form-inline">' +
-      '         <p class="help-block rdf-prefix feedbacktext">Please input your Credentials.</p>' +
+      '         <p class="help-block rdf-prefix feedbacklabeltext">Please input your Credentials.</p>' +
       '         <div class="form-group">' +
       '           <input id="feedbackFormAuthor" type="email" class="form-control" placeholder="Your E-Mail" required>' +
       '         </div>' +
