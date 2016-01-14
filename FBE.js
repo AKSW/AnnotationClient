@@ -16,7 +16,6 @@ var FBE_Factory = {
       '        </form>' +
       '         &nbsp;&nbsp;' +
       '        <button id="feedbackModal_list_entry_changeBtn' + id + '" onclick="FBE_Handler.onButtonClicked_ChangeTriple(' + id + ')" class="btn btn-default dropdown-toggle feedbackbtn" style="display: inline-block;">&Auml;ndern</button>'+
-      '        <button id="feedbackModal_list_entry_saveBtn' + id + '" onclick="FBE_Handler.onButtonClicked_SaveTriple(' + id + ')" class="btn btn-default dropdown-toggle feedbackbtn" style="display: none;"">Speichern</button>'+
       '        </div>';
 
     return html;
@@ -30,19 +29,6 @@ var FBE_Handler = {
     //change hidden and readonly attributes
     $("#feedbackModal_list_entry"+id+" > div > input").prop("readonly", false);
     $("#feedbackModal_list_entry_changeBtn"+id).hide();
-    $("#feedbackModal_list_entry_saveBtn"+id).show();
-  },
-
-  onButtonClicked_SaveTriple: function(id) {
-    console.log("clicked on saving triple " + id);
-
-    //safe changes
-
-
-    //change hidden and readonly attributes
-    $("#feedbackModal_list_entry"+id+" > div > input").prop("readonly", true);
-    $("#feedbackModal_list_entry_changeBtn"+id).show();
-    $("#feedbackModal_list_entry_saveBtn"+id).hide();
   }
 };
 
