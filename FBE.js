@@ -15,8 +15,8 @@ var FBE_Factory = {
       '         </div>' +
       '        </form>' +
       '         &nbsp;&nbsp;' +
-      '        <button id="feedbackModal_list_entry_changeBtn' + id + '" onclick="FBE_Handler.onButtonClicked_ChangeTriple(' + id + ')" class="btn btn-default dropdown-toggle feedbackbtn" style="display: inline-block;">&Auml;ndern</button>'+
-      '        <button id="feedbackModal_list_entry_saveBtn' + id + '" onclick="FBE_Handler.onButtonClicked_SaveTriple(' + id + ')" class="btn btn-default dropdown-toggle feedbackbtn" style="display: none;"">Speichern</button>'+
+      '        <button id="feedbackModal_list_entry_changeBtn' + id + '" onclick="FBE_Handler.onButtonClicked_ChangeTriple(' + id + ')" class="btn btn-default dropdown-toggle feedbackbtn" style="display: inline-block;">&Auml;ndern</button>' +
+      '        <button id="feedbackModal_list_entry_saveBtn' + id + '" onclick="FBE_Handler.onButtonClicked_SaveTriple(' + id + ')" class="btn btn-default dropdown-toggle feedbackbtn" style="display: none;"">Speichern</button>' +
       '        </div>';
 
     return html;
@@ -28,9 +28,9 @@ var FBE_Handler = {
     console.log("clicked on changing triple" + id);
 
     //change hidden and readonly attributes
-    $("#feedbackModal_list_entry"+id+" > div > input").prop("readonly", false);
-    $("#feedbackModal_list_entry_changeBtn"+id).hide();
-    $("#feedbackModal_list_entry_saveBtn"+id).show();
+    $("#feedbackModal_list_entry" + id + " > div > input").prop("readonly", false);
+    $("#feedbackModal_list_entry_changeBtn" + id).hide();
+    $("#feedbackModal_list_entry_saveBtn" + id).show();
   },
 
   onButtonClicked_SaveTriple: function(id) {
@@ -40,9 +40,9 @@ var FBE_Handler = {
 
 
     //change hidden and readonly attributes
-    $("#feedbackModal_list_entry"+id+" > div > input").prop("readonly", true);
-    $("#feedbackModal_list_entry_changeBtn"+id).show();
-    $("#feedbackModal_list_entry_saveBtn"+id).hide();
+    $("#feedbackModal_list_entry" + id + " > div > input").prop("readonly", true);
+    $("#feedbackModal_list_entry_changeBtn" + id).show();
+    $("#feedbackModal_list_entry_saveBtn" + id).hide();
   }
 };
 
@@ -77,13 +77,13 @@ var FBE = {
       '        </div>' +
       '        <div id="feedbackModal_list"></div>' +
       '        <hr>' +
-      '        <form id="feedbackForm" class="form-inline">' +
-      '         <p class="help-block rdf-prefix feedbacklabeltext">Please input your Credentials.</p>' +
+      '        <form id="feedbackForm" class="">' +
+      '         <p class="help-block rdf-prefix feedbacklabeltext">Please leave us a comment and your identity.</p>' +
       '         <div class="form-group">' +
-      '           <input id="feedbackFormAuthor" type="email" class="form-control" placeholder="Your E-Mail" required>' +
+      '           <input id="feedbackFormAuthor" type="email" class="form-control" placeholder="Your e-mail address">' +
       '         </div>' +
       '         <div class="form-group">' +
-      '           <input id="feedbackFormMessage" type="text" class="form-control" placeholder="Your Message" >' +
+      '         <textarea id="feedbackFormMessage" rows="2" form="feedbackForm" class="form-control" placeholder="Your message..."></textarea>' +
       '         </div>' +
       '        </form>' +
       '      </div>' +
@@ -190,40 +190,55 @@ var FBE = {
 
   createCommit: function(event) {
     event.preventDefault();
-    var triples = [],
-      parser = N3.Parser({
-        format: 'application/trig'
-      });
     //TODO Look for naming and hashing
-    parser.parse('@prefix ex: <http://example.org/feedback#>.\n' +
-      '           @prefix eccrev: <https://vocab.eccenca.com/revision/>.\n' +
-      '           @prefix prov: <http://www.w3.org/ns/prov#>.\n' +
-      '           @prefix xsd: <http://www.w3.org/2001/XMLSchema#>.\n' +
-      '           ex:patch-9999999 a eccrev:Commit;\n' +
-      '                            eccrev:commitAuthor ex:' + $("#feedbackFormAuthor").val() + ';\n' +
-      '                            eccrev:commitMessage "' + $("#feedbackFormMessage").val() + '";\n' +
-      '                            prov:atTime "' + new Date().toISOString() + '"^^xsd:dateTime;\n' + //Format: 2015-12-17T13:37:00+01:00
-      '                            eccrev:sha256 "9999999"^^xsd:base64Binary;\n' + //TODO SHA256 Calc: var digest_hex = SHA256_hash("abc");
-      '                            eccrev:deltaDelete ex:delete-9999999;\n' +
-      '                            eccrev:deltaInsert ex:insert-9999999.',
-      function(error, triple, prefixes) {
-        if (triple)
-          triples.push(triple);
-        else
-          FBE.sendFeedback(triples);
-      });
+    var hash = SHA256_hash(new Date().toISOString());
+    var insertRevision = hash,
+      deleteRevision = hash,
+      patchRevision = hash,
+      revisionRevision = hash;
+
+    var del = 'ex:delete-' + deleteRevision + getDeletes();
+    var insert = 'ex:insert-' + insertRevision + getInserts();
+    var trig = '@prefix ex: <http://example.org/feedback#>.\n' +
+      '@prefix eccrev: <https://vocab.eccenca.com/revision/>.\n' +
+      '@prefix prov: <http://www.w3.org/ns/prov#>.\n' +
+      '@prefix xsd: <http://www.w3.org/2001/XMLSchema#>.\n' +
+      '@prefix rdfs: <http://www.w3.org/2001/XMLSchema#>.\n' +
+      '@prefix owl: <http://www.w3.org/2002/07/owl#>.\n' +
+      '{ ex:patch-' + patchRevision + ' a eccrev:Commit;\n' +
+      '    eccrev:commitAuthor ex:' + $("#feedbackFormAuthor").val() + ';\n' +
+      '    eccrev:commitMessage "' + $("#feedbackFormMessage").val() + '";\n' +
+      '    prov:atTime "' + new Date().toISOString() + '"^^xsd:dateTime;\n' + //Format: 2015-12-17T13:37:00+01:00
+      '    eccrev:sha256 "' + SHA256_hash(del + insert) + '"^^xsd:base64Binary.\n' +
+      '  eccrev:revision-' + revisionRevision + ' a eccrev:Revision;\n' +
+      '    eccrev:hasRevisionGraph ex:TargetGraph;\n' +
+      '    eccrev:deltaDelete ex:delete-' + deleteRevision + ';\n' +
+      '    eccrev:deltaInsert ex:insert-' + insertRevision + '\n' +
+      '}\n';
+    FBE.sendFeedback(trig + del + insert);
   },
 
-  sendFeedback: function(triples) {
-    console.log(triples);
-    var writer = N3.Writer({
-      format: 'application/trig'
-    });
-    writer.addTriples(triples);
-    writer.end(function(error, result) {
-      if (!error)
-        console.log(result);
-    });
+  getInserts: function() {
+    var inserts = ' {  }\n'; //TODO insert inserts from Kurt
+    return inserts;
+  },
+  getDeletes: function() {
+    var dels = '{  }'; //TODO insert deletes from Kurt
+    return dels;
+  },
+
+  sendFeedback: function(trig) {
+    console.log(trig);
+    // TODO Post to Resource Hosting Service
+    /*
+    $.post(url, trig, null, "application/trig")
+      .done(function() {})
+      .fail(function() {});
+    // TODO Post to Pingback
+    $.post(url, {}, null, "application/trig")
+      .done(function() {})
+      .fail(function() {});
+    */
   },
 
   getDiff: function() {
