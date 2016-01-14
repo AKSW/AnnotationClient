@@ -2,24 +2,26 @@ var FBE_Factory = {
   listEntry: function(id, subject, predicate, object) {
     var html = '        <div>' +
       '        <form class="form-inline" id="feedbackModal_list_entry' + id + '" style="display: inline-block; width: 92%">' +
-      '         <div class="form-group" style="width: 39%">' +
+      /*'         <div class="form-group" style="width: 39%">' +
       '             <input type="text" class="form-control pred-value" value="' + subject + '" readonly>' +
       '         </div>' +
-      '         &nbsp;&nbsp;' +
-      '         <div class="form-group" style="width: 20%">' +
+      '         &nbsp;&nbsp;' + //*/
+      '         <div class="form-group" style="width: 40%">' +
       '             <input type="text" class="form-control pred-value" value="' + predicate + '" readonly>' +
       '         </div>' +
       '         &nbsp;&nbsp;' +
-      '         <div class="form-group" style="width: 39%">' +
-      '             <input type="text" class="form-control pred-value" value="' + object + '" readonly>' +
+      '         <div class="form-group" style="width: 58%">' +
+      '             <input type="text" class="form-control pred-value" value="' + object.replace("\"", "") + '" readonly>' +
       '         </div>' +
       '        </form>' +
       '         &nbsp;&nbsp;' +
-      '        <button id="feedbackModal_list_entry_changeBtn' + id + '" onclick="FBE_Handler.onButtonClicked_ChangeTriple(' + id + ')" class="btn btn-default dropdown-toggle feedbackbtn" style="display: inline-block;">&Auml;ndern</button>' +
-      '        <button id="feedbackModal_list_entry_saveBtn' + id + '" onclick="FBE_Handler.onButtonClicked_SaveTriple(' + id + ')" class="btn btn-default dropdown-toggle feedbackbtn" style="display: none;"">Speichern</button>' +
+      '        <button id="feedbackModal_list_entry_changeBtn' + id + '" onclick="FBE_Handler.onButtonClicked_ChangeTriple(' + id + ')" class="btn btn-default dropdown-toggle feedbackbtn" style="display: inline-block;">&Auml;ndern</button>'+
       '        </div>';
 
     return html;
+  },
+  listEntryFromRDF: function(i, element) {
+    return FBE_Factory.listEntry(i, element.subject, element.predicate, element["object"]);
   }
 };
 
@@ -28,21 +30,8 @@ var FBE_Handler = {
     console.log("clicked on changing triple" + id);
 
     //change hidden and readonly attributes
-    $("#feedbackModal_list_entry" + id + " > div > input").prop("readonly", false);
-    $("#feedbackModal_list_entry_changeBtn" + id).hide();
-    $("#feedbackModal_list_entry_saveBtn" + id).show();
-  },
-
-  onButtonClicked_SaveTriple: function(id) {
-    console.log("clicked on saving triple " + id);
-
-    //safe changes
-
-
-    //change hidden and readonly attributes
-    $("#feedbackModal_list_entry" + id + " > div > input").prop("readonly", true);
-    $("#feedbackModal_list_entry_changeBtn" + id).show();
-    $("#feedbackModal_list_entry_saveBtn" + id).hide();
+    $("#feedbackModal_list_entry"+id+" > div > input").prop("readonly", false);
+    $("#feedbackModal_list_entry_changeBtn"+id).hide();
   }
 };
 
@@ -129,56 +118,18 @@ var FBE = {
         console.log(textStatus + " " + error);
 
         //has to be removed - show error
-        FBE.parseNewTriples(Gegenteil_JSON, resource);
+        FBE.parseNewTriples(Gegenteil_JSON, "Gegenteil");
 
         //hide progress bar
         //$("#feedbackModal_progressbar").hide();
       });
   },
 
-  //Transforms RDF JSON from DBPedia to an object for the list view
-  parseNewTriples: function(data, ressourceName) {
-    var prepareRDFJSONForListView = function(json, ressourceName) {
-      if (json === undefined || json === null || json.length < 1 || json == {})
-        return [];
-
-      var object = getNeededRessourceFromRDF(json, ressourceName);
-
-      var result = [];
-      for (var key in object) {
-        var entryList = object[key];
-        entryList.forEach(function(entry) {
-          result.push({
-            subject: key,
-            predicate: entry.type,
-            object_: entry.value
-          });
-        });
-      }
-
-      return {
-        name: ressourceName,
-        triples: result
-      };
-    };
-
-    var getNeededRessourceFromRDF = function(json, ressourceName) {
-      var ressource = json["http://de.wikipedia.org/wiki/" + ressourceName];
-      return json[ressource["http://xmlns.com/foaf/0.1/primaryTopic"][0].value];
-    };
-
-    if (data === undefined || data === null || data == {})
-      return;
-
-    var result = prepareRDFJSONForListView(data, "Gegenteil"); //ressourceName);
-
-    console.log("parsed RDF JSON:");
-    console.log(result);
-
+  showNewTriples: function() {
     var newListEntrys = "";
     var i = 1;
-    result.triples.forEach(function(element) {
-      newListEntrys += FBE_Factory.listEntry(i, element.subject, element.predicate, element.object_) + "<br>";
+    FBE.RessourceTuples.forEach(function(element) {
+      newListEntrys += FBE_Factory.listEntryFromRDF(i, element) + "<br>";
       i++;
     });
 
@@ -186,6 +137,48 @@ var FBE = {
 
     //hide progress bar
     $("#feedbackModal_progressbar").hide();
+  },
+
+  cleanupNewTriples: function(ressourceName) {
+    var i = 0;
+    var namespace = "";
+    for (; i < FBE.RessourceTuples.length; i++){
+      var subject = FBE.RessourceTuples[i].subject;
+
+      if (subject == "http://de.wikipedia.org/wiki/"+ressourceName) {
+        namespace = FBE.RessourceTuples[i]["object"];
+        break;
+      }
+    }
+
+    if (namespace !== "") {
+      var result = [];
+      FBE.RessourceTuples.forEach(function(element) {
+        if (element.subject == namespace)
+          result.push(element);
+      });
+
+      console.log("Cleanup from ", FBE.RessourceTuples, " to ", result);
+
+      FBE.RessourceTuples = result;
+
+      FBE.showNewTriples();
+    }
+  },
+
+  //Transforms RDF JSON from DBPedia to an object for the list view
+  parseNewTriples: function(data, ressourceName) {
+    var parser = N3.Parser({ format: 'turtle' });
+
+    parser.parse(myn3___, function (error, triple, prefixes) {
+       //console.log(triple, prefixes, error);
+
+       if (triple)
+         FBE.RessourceTuples.push(triple);
+       else {
+         FBE.cleanupNewTriples(ressourceName);
+       }
+     });
   },
 
   createCommit: function(event) {
@@ -246,6 +239,7 @@ var FBE = {
     return diffs;
   },
 
+  RessourceTuples: []
 };
 
 $(document).ready(function() {
