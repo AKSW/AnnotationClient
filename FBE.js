@@ -1,17 +1,17 @@
 var FBE_Factory = {
   listEntry: function(id, subject, predicate, object) {
     var html = '        <div>' +
-      '        <form class="form-inline" id="feedbackModal_list_entry' + id + '" style="display: inline-block; width: 92%">' +
+      '        <form class="form-inline feedbackModal_list_entry_TYPE" id="feedbackModal_list_entry' + id + '" style="display: inline-block; width: 92%">' +
       /*'         <div class="form-group" style="width: 39%">' +
       '             <input type="text" class="form-control pred-value" value="' + subject + '" readonly>' +
       '         </div>' +
       '         &nbsp;&nbsp;' + //*/
       '         <div class="form-group" style="width: 40%">' +
-      '             <input type="text" class="form-control pred-value" value="' + predicate + '" readonly>' +
+      '             <input type="text" class="form-control pred-value" name="predicate" data_original="' + predicate + '" data_index="'+id+'" value="' + predicate + '" readonly>' +
       '         </div>' +
       '         &nbsp;&nbsp;' +
       '         <div class="form-group" style="width: 58%">' +
-      '             <input type="text" class="form-control pred-value" value="' + object.replace("\"", "") + '" readonly>' +
+      '             <input type="text" class="form-control pred-value" name="object" data_original="' + object.replace("\"", "") + '" data_index="'+id+'" value="' + object.replace("\"", "") + '" readonly>' +
       '         </div>' +
       '        </form>' +
       '         &nbsp;&nbsp;' +
@@ -139,6 +139,7 @@ var FBE = {
     $("#feedbackModal_progressbar").hide();
   },
 
+  //remove unnecessary elements from RessourceTuples
   cleanupNewTriples: function(ressourceName) {
     var i = 0;
     var namespace = "";
@@ -239,7 +240,65 @@ var FBE = {
     return diffs;
   },
 
-  RessourceTuples: []
+  RessourceTuples: [],
+
+  //update FBE.Deletions and FBE.Inserts
+  updateChanges: function(ressourceName) {
+    FBE.Deletions = [];
+    FBE.Inserts = [];
+
+    //get all inputs
+    var inputs = $(".feedbackModal_list_entry_TYPE").find("input");
+
+    //filter inputs
+    var filteredInputs = [];
+    inputs.toArray().forEach(function(input) {
+      if (input.attributes["readonly"] === undefined)
+      {
+        filteredInputs.push(input);
+      }
+    });
+
+    if (filteredInputs.length < 1)
+      return;
+
+    //fill Deletions and Inserts
+    var map = {};
+    filteredInputs.forEach(function(input) {
+      //init map
+      if (map[input.attributes["data_index"].value] === undefined)
+        map[input.attributes["data_index"].value] = {
+          old: {
+            subject: "http://de.wikipedia.org/wiki/"+ressourceName,
+            key: input.attributes["data_index"].value
+          },
+          new: {
+            subject: "http://de.wikipedia.org/wiki/"+ressourceName,
+            key: input.attributes["data_index"].value
+          }
+        };
+
+      //fill map
+      if (input.name == "predicate") {
+        map[input.attributes["data_index"].value].old.predicate = input.attributes["data_original"].value;
+        map[input.attributes["data_index"].value].new.predicate = input.value;
+      }
+      else {
+        map[input.attributes["data_index"].value].old.object = input.attributes["data_original"].value;
+        map[input.attributes["data_index"].value].new.object = input.value;
+      }
+    });
+
+    //transform map
+    for (var key in map) {
+      FBE.Deletions.push(map[key].old);
+      FBE.Inserts.push(map[key].new);
+    }
+  },
+
+  //Arrays with objects: {subject, predicate, object, key}
+  Deletions: [],
+  Inserts: []
 };
 
 $(document).ready(function() {
