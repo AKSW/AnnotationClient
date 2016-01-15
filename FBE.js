@@ -107,7 +107,7 @@ var FBE = {
     FBE.ressourceName = $(document).find("title").text();
     //TODO get correct ressource namespace automaticallygit
     FBE.ressourceNamespace = "http://de.wikipedia.org/wiki/";
-    $(this).find('.modal-title').text('Feedback on Ressource ' + FBE.ressourceName);
+    $("#feedbackModal").find('.modal-title').text('Feedback on Ressource ' + FBE.ressourceName);
     FBE.getTriples();
   },
 
