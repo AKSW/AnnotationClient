@@ -16,53 +16,18 @@ var FBE_Factory = {
       '   </div>' +
       '  </form>' +
       '  &nbsp;&nbsp;' +
-      '  <button id="feedbackModal_list_entry_changeBtn' + id + '" onclick="FBE_Handler.onButtonClicked_ChangeTriple(' + id + ')" class="btn btn-default dropdown-toggle feedbackbtn" style="display: inline-block;">&Auml;ndern</button>' +
+      '  <button id="feedbackModal_list_entry_changeBtn' + id + '" onclick="FBE_Handler.activateEditMode(' + id + ')" class="btn btn-default dropdown-toggle feedbackbtn" style="display: inline-block;">&Auml;ndern</button>' +
       '</div>';
 
     return html;
   },
+
   listEntryFromRDF: function(i, element) {
     return FBE_Factory.listEntry(i, element.subject, element.predicate, element.object);
-  }
-};
-
-var FBE_Handler = {
-  onButtonClicked_ChangeTriple: function(id) {
-    console.log("clicked on changing triple" + id);
-
-    $("#feedbackModal_list_entry" + id + " > div > input").prop("readonly", false);
-    $("#feedbackModal_list_entry_changeBtn" + id).hide();
-  }
-};
-
-var FBE = {
-
-  ressourceNamespace: "",
-  ressourceName: "",
-
-  //Arrays with objects: {subject, predicate, object, key}
-  Deletions: [],
-  Inserts: [],
-  RessourceTuples: [],
-
-  addFeedbackButton: function() {
-    var button = '<button id="feedbackButton" type="button" class="btn btn-primary">Give Feedback</button>';
-    $("body").append(button);
-    $("#feedbackButton").click(FBE.openFeedbackModal);
   },
 
-  openFeedbackModal: function() {
-    var modal = $("#feedbackModal");
-    if (modal.size() !== 0)
-      $("#feedbackModal").modal();
-    else {
-      FBE.createFeedbackModal();
-      FBE.openFeedbackModal();
-    }
-  },
-
-  createFeedbackModal: function() {
-    var modal = '<div id="feedbackModal" class="modal fade" tabindex="-1" role="dialog">' +
+  getModal: function() {
+    return '<div id="feedbackModal" class="modal fade" tabindex="-1" role="dialog">' +
       '  <div class="modal-dialog modal-lg">' +
       '    <div class="modal-content">' +
       '      <div class="modal-header">' +
@@ -92,9 +57,49 @@ var FBE = {
       '    </div>' +
       '  </div>' +
       '</div>';
-    $("body").append(modal);
+  }
+};
 
-    $("#feedbackForm").submit(FBE.createCommit);
+var FBE_Handler = {
+  openFeedbackModal: function() {
+    var modal = $("#feedbackModal");
+    if (modal.size() !== 0)
+      $("#feedbackModal").modal();
+    else {
+      FBE.createFeedbackModal();
+      FBE_Handler.openFeedbackModal();
+    }
+  },
+
+  sendFeedback: function(event) {
+    event.preventDefault();
+    FBE.createCommit();
+  },
+
+  activateEditMode: function(id) {
+    console.log("clicked on changing triple" + id);
+    $("#feedbackModal_list_entry" + id + " > div > input").prop("readonly", false);
+    $("#feedbackModal_list_entry_changeBtn" + id).hide();
+  }
+};
+
+var FBE = {
+
+  ressourceNamespace: "",
+  ressourceName: "",
+  //Arrays with objects: {subject, predicate, object, key}
+  Deletions: [],
+  Inserts: [],
+  RessourceTuples: [],
+
+  addFeedbackButton: function() {
+    $("body").append('<button id="feedbackButton" type="button" class="btn btn-primary">Give Feedback</button>');
+    $("#feedbackButton").click(FBE_Handler.openFeedbackModal);
+  },
+
+  createFeedbackModal: function() {
+    $("body").append(FBE_Factory.getModal());
+    $("#feedbackForm").submit(FBE_Handler.sendFeedback);
     FBE.fillFeedbackModal();
   },
 
@@ -161,8 +166,7 @@ var FBE = {
     $("#feedbackModal_progressbar").hide();
   },
 
-  createCommit: function(event) {
-    event.preventDefault();
+  createCommit: function() {
     FBE.updateChanges();
     //TODO Look for naming and hashing
     var insertRevision = deleteRevision = patchRevision = revisionRevision = SHA256_hash(new Date().toISOString());
@@ -193,14 +197,14 @@ var FBE = {
 
   getInserts: function() {
     var inserts = FBE.Inserts
-      .map(obj => obj.subject + ' ' + obj.predicate + ' ' + obj.object + ';\n')
+      .map(obj => obj.subject + ' ' + obj.predicate + ' ' + obj.object + '.\n')
       .reduce((prev, curr, _) => prev + curr).slice(0, -2);
     return (' { ' + inserts + ' }');
   },
 
   getDeletes: function() {
     var deletions = FBE.Deletions
-      .map(obj => obj.subject + ' ' + obj.predicate + ' ' + obj.object + ';\n')
+      .map(obj => obj.subject + ' ' + obj.predicate + ' ' + obj.object + '.\n')
       .reduce((prev, curr, _) => prev + curr).slice(0, -2);
     return ('{ ' + deletions + ' }\n');
   },
