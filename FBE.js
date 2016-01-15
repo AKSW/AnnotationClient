@@ -1,5 +1,6 @@
 var FBE_Factory = {
   listEntry: function(id, subject, predicate, object) {
+    //REVIEW whats about a global <form></form> with <div class="form-group"></div> inside?
     var html = '<div>' +
       '  <form class="form-inline feedbackModal_list_entry_TYPE" id="feedbackModal_list_entry' + id + '" style="display: inline-block; width: 92%">' +
       /*'         <div class="form-group" style="width: 39%">' +
@@ -123,6 +124,7 @@ var FBE = {
   },
 
   //Transforms RDF JSON from DBPedia to an object for the list view
+  //IDEA N3 Lib is only used in here....maybe we can avoid N3 Lib at all?!
   parseNewTriples: function(data) {
     var parser = N3.Parser({
       format: 'turtle'
