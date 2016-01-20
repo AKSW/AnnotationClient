@@ -210,10 +210,10 @@ var FBE = {
       '    eccrev:commitAuthor <mailto:' + $("#feedbackFormAuthor").val() + '>;\n' +
       '    eccrev:commitMessage "' + $("#feedbackFormMessage").val() + '";\n' +
       '    prov:atTime "' + new Date().toISOString() + '"^^xsd:dateTime;\n' + //Format: 2015-12-17T13:37:00+01:00
-      '    sioc:reply_of ' + FBE.ressourceNamespace + FBE.ressourceName + ';\n' +
+      '    sioc:reply_of ' + FBE.checkForAngleBrackets(FBE.ressourceNamespace + FBE.ressourceName) + ';\n' +
       '    eccrev:sha256 "' + SHA256_hash(del + insert) + '"^^xsd:base64Binary.\n' +
       '  eccrev:revision-' + revisionRevision + ' a eccrev:Revision;\n' +
-      '    sioc:reply_of ' + FBE.ressourceNamespace + FBE.ressourceName + ';\n' +
+      '    sioc:reply_of ' + FBE.checkForAngleBrackets(FBE.ressourceNamespace + FBE.ressourceName) + ';\n' +
       '    eccrev:deltaDelete ex:delete-' + deleteRevision + ';\n' +
       '    eccrev:deltaInsert ex:insert-' + insertRevision + '\n' +
       '}\n';
@@ -225,7 +225,7 @@ var FBE = {
     var inserts = "";
     if (FBE.Inserts.length !== 0) {
       inserts = FBE.Inserts
-        .map(obj => obj.subject + ' ' + obj.predicate + ' ' + obj.object + '.\n')
+        .map(obj => FBE.checkForAngleBrackets(obj.subject) + ' ' + FBE.checkForAngleBrackets(obj.predicate) + ' ' + FBE.checkForAngleBrackets(obj.object) + '.\n')
         .reduce((prev, curr, _) => prev + curr).slice(0, -2);
     }
     return (' { ' + inserts + ' }');
@@ -235,10 +235,17 @@ var FBE = {
     var deletions = "";
     if (FBE.Deletions.length !== 0) {
       deletions = FBE.Deletions
-        .map(obj => obj.subject + ' ' + obj.predicate + ' ' + obj.object + '.\n')
+        .map(obj => FBE.checkForAngleBrackets(obj.subject) + ' ' + FBE.checkForAngleBrackets(obj.predicate) + ' ' + FBE.checkForAngleBrackets(obj.object) + '.\n')
         .reduce((prev, curr, _) => prev + curr).slice(0, -2);
     }
     return ('{ ' + deletions + ' }\n');
+  },
+
+  checkForAngleBrackets: function(str) {
+    if (str.startsWith("http"))
+      return "<" + str + ">";
+    else
+      return str;
   },
 
   sendFeedback: function(trig) {
