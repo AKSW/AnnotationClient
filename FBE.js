@@ -2,10 +2,10 @@ var FBE_Factory = {
   listEntry: function(id, subject, predicate, object) {
     var html = '<div id="feedbackListEntry' + id + '" data-id="' + id + '">' +
       ' <div class="form-group">' +
-      '   <input type="text" class="form-control" name="predicate" data_id="' + id + '" data_original="' + predicate + '" value="' + predicate + '" readonly size="34">' +
+      '   <input type="text" class="form-control" name="predicate" data_id="' + id + '" data_original="' + predicate + '" value="' + predicate + '" readonly size="37>' +
       ' </div>' +
       ' <div class="form-group">' +
-      '   <input type="text" class="form-control" name="object" data_id="' + id + '" data_original="' + object.replace("\"", "") + '" value="' + object.replace("\"", "") + '" readonly size="44">' +
+      '   <input type="text" class="form-control" name="object" data_id="' + id + '" data_original="' + object.replace("\"", "") + '" value="' + object.replace("\"", "") + '" readonly size="50">' +
       ' </div>' +
       ' <button class="btn btn-default"><i class="fa fa-edit"></i> Ändern</button>' +
       '</div>';
