@@ -1,22 +1,13 @@
 var FBE_Factory = {
   listEntry: function(id, subject, predicate, object) {
-    //REVIEW whats about a global <form></form> with <div class="form-group"></div> inside?
-    var html = '<div>' +
-      '  <form class="form-inline feedbackModal_list_entry_TYPE" id="feedbackModal_list_entry' + id + '" style="display: inline-block; width: 92%">' +
-      /*'         <div class="form-group" style="width: 39%">' +
-      '             <input type="text" class="form-control pred-value" value="' + subject + '" readonly>' +
-      '         </div>' +
-      '         &nbsp;&nbsp;' + //*/
-      '   <div class="form-group" style="width: 40%">' +
-      '     <input type="text" class="form-control pred-value" name="predicate" data_original="' + predicate + '" data_index="' + id + '" value="' + predicate + '" readonly>' +
-      '   </div>' +
-      '   &nbsp;&nbsp;' +
-      '   <div class="form-group" style="width: 58%">' +
-      '     <input type="text" class="form-control pred-value" name="object" data_original="' + object.replace("\"", "") + '" data_index="' + id + '" value="' + object.replace("\"", "") + '" readonly>' +
-      '   </div>' +
-      '  </form>' +
-      '  &nbsp;&nbsp;' +
-      '  <button id="feedbackModal_list_entry_changeBtn' + id + '" onclick="FBE_Handler.activateEditMode(' + id + ')" class="btn btn-default dropdown-toggle feedbackbtn" style="display: inline-block;">&Auml;ndern</button>' +
+    var html = '<div id="feedbackListEntry'+id+'" data-id="' + id + '">' +
+      ' <div class="form-group">' +
+      '   <input type="text" class="form-control" name="predicate" data_original="' + predicate + '" value="' + predicate + '" readonly size="34">' +
+      ' </div>' +
+      ' <div class="form-group">' +
+      '   <input type="text" class="form-control" name="object" data_original="' + object.replace("\"", "") + '" value="' + object.replace("\"", "") + '" readonly size="44">' +
+      ' </div>' +
+      ' <button class="btn btn-default"><i class="fa fa-edit"></i> Ändern</button>' +
       '</div>';
 
     return html;
@@ -38,10 +29,10 @@ var FBE_Factory = {
       '        <div class="progress progress-striped active" id="feedbackModal_progressbar">' +
       '         <div class="progress-bar" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width: 100%"></div>' +
       '        </div>' +
-      '        <div id="feedbackModal_list"></div>' +
+      '        <form id="feedbackEntryList" class="form-inline"></form>' +
       '        <hr>' +
-      '        <form id="feedbackForm" class="">' +
-      '         <p class="help-block rdf-prefix feedbacklabeltext">Please leave us a comment and your identity.</p>' +
+      '        <form id="feedbackForm">' +
+      '         <p class="help-block">Please leave us a comment and your identity.</p>' +
       '         <div class="form-group">' +
       '           <input id="feedbackFormAuthor" type="email" class="form-control" placeholder="Your e-mail address">' +
       '         </div>' +
@@ -51,8 +42,8 @@ var FBE_Factory = {
       '        </form>' +
       '      </div>' +
       '      <div class="modal-footer">' +
-      '       <button type="button" class="btn btn-primary feedbackbtn" data-dismiss="modal">Close</button>' +
-      '       <button id="feedbackModalSave" type="submit" form="feedbackForm" class="btn btn-success feedbackbtn">Save changes</button>' +
+      '       <button type="button" class="btn btn-primary feedbackbtn" data-dismiss="modal"><i class="fa fa-close"></i> Close</button>' +
+      '       <button id="feedbackModalSave" type="submit" form="feedbackForm" class="btn btn-success feedbackbtn"><i class="fa fa-download"></i> Save changes</button>' +
       '      </div>' +
       '    </div>' +
       '  </div>' +
@@ -76,10 +67,11 @@ var FBE_Handler = {
     FBE.createCommit();
   },
 
-  activateEditMode: function(id) {
-    console.log("clicked on changing triple" + id);
-    $("#feedbackModal_list_entry" + id + " > div > input").prop("readonly", false);
-    $("#feedbackModal_list_entry_changeBtn" + id).hide();
+  activateEditMode: function(event) {
+    event.preventDefault();
+    var id = $(event.target).parent("div").data("id");
+    $("#feedbackListEntry" + id + " > div > input").prop("readonly", false);
+    $(event.target).hide();
   }
 };
 
@@ -99,6 +91,7 @@ var FBE = {
 
   createFeedbackModal: function() {
     $("body").append(FBE_Factory.getModal());
+    $("#feedbackEntryList").on("click", "button", FBE_Handler.activateEditMode);
     $("#feedbackForm").submit(FBE_Handler.sendFeedback);
     FBE.fillFeedbackModal();
   },
@@ -162,7 +155,7 @@ var FBE = {
       .map((element, i) => FBE_Factory.listEntryFromRDF(i + 1, element) + "<br>")
       .reduce((prev, curr) => prev + curr);
 
-    $("#feedbackModal_list").append(listEntries);
+    $("#feedbackEntryList").append(listEntries);
     $("#feedbackModal_progressbar").hide();
   },
 
