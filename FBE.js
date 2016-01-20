@@ -1,11 +1,11 @@
 var FBE_Factory = {
   listEntry: function(id, subject, predicate, object, hint) {
-    var html = '<div id="feedbackListEntry'+id+'" data-id="' + id + '">' +
+    var html = '<div id="feedbackListEntry' + id + '" data_id="' + id + '">' +
       ' <div class="form-group">' +
       '   <input type="text" class="form-control" name="predicate" data_id="' + id + '" data_original="' + predicate + '" value="' + predicate + '" readonly size="37>' +
       ' </div>' +
       ' <div class="form-group">' +
-      '   <input type="text" class="form-control" name="object" data_id="' + id + '" data_original="' + object.replace("\"", "") + '" value="' + object.replace("\"", "") + '" title="'+hint+'"  readonly size="50">' +
+      '   <input type="text" class="form-control" name="object" data_id="' + id + '" data_original="' + object.replace("\"", "") + '" value="' + object.replace("\"", "") + '" title="' + hint + '"  readonly size="50">' +
       ' </div>' +
       ' <button class="btn btn-info feedbackEdit"><i class="fa fa-edit"></i></button>' +
       ' <button class="btn btn-danger feedbackRemove"><i class="fa fa-remove"></i></button>' +
@@ -86,10 +86,11 @@ var FBE_Handler = {
 
   addTriple: function(event) {
     event.preventDefault();
-    var id = parseInt($("#feedbackEntryList > div:last").attr("data_id")) + 1;
-    var entry = FBE_Factory.listEntry(id, "namespace", "", "")+'<br>';
+    var id = parseInt($("#feedbackEntryList > div:last").attr("data_id"))+1;
+    var entry = FBE_Factory.listEntry(id, "namespace", "", "") + '<br>';
     $("#feedbackEntryList").find(".feedbackAdd").before(entry);
     $("#feedbackEntryList #feedbackListEntry" + id + " > button.feedbackEdit").click();
+    $("#feedbackEntryList #feedbackListEntry" + id + " input").addClass("new");
   }
 };
 
@@ -126,15 +127,14 @@ var FBE = {
 
   getTriples: function() {
     //debug
-    if (location.toString().startsWith("file://") || location.toString().startsWith("http://kdi-student.de"))
-    {
+    if (location.toString().startsWith("file://") || location.toString().startsWith("http://kdi-student.de") || location.toString().startsWith("http://localhost")) {
       FBE.getTriplesFromFile();
       return;
     }
 
     //prepare url for GET
     var url = location.toString();
-    if (url.substring(url.length-1, url.length) !== "?")
+    if (url.substring(url.length - 1, url.length) !== "?")
       url += "?";
 
     $.get(url + "output=application%2Frdf%2Bjson")
@@ -180,8 +180,8 @@ var FBE = {
     for (var key in triples) {
       var value = triples[key];
 
-      listEntries = value.map((element, i) => FBE_Factory.listEntry(i + counter, firstKey, key, element.value, element.type + ( (element.datatype) ? ": "+element.datatype : "" )) + "<br>")
-                        .reduce((prev, curr) => prev + curr, listEntries);
+      listEntries = value.map((element, i) => FBE_Factory.listEntry(i + counter, firstKey, key, element.value, element.type + ((element.datatype) ? ": " + element.datatype : "")) + "<br>")
+        .reduce((prev, curr) => prev + curr, listEntries);
 
       counter += Object.keys(value).length;
     }
@@ -269,36 +269,43 @@ var FBE = {
     //fill Deletions and Inserts
     //FIXME very annoying, because JS got Maps and this is not such a map. See https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Map
 
-    var map = {};
+    var changes = {};
     filteredInputs.forEach(function(input) {
-      //init map
-      if (map[input.attributes["data_id"].value] === undefined)
-        map[input.attributes["data_id"].value] = {
+      if (changes[input.attributes["data_id"].value] === undefined) {
+        changes[input.attributes["data_id"].value] = {
           old: {
             subject: FBE.ressourceNamespace + FBE.ressourceName,
-            key: input.attributes["data_id"].value
+            key: input.attributes["data_id"].value,
+            saveThis: true
           },
           new: {
             subject: FBE.ressourceNamespace + FBE.ressourceName,
-            key: input.attributes["data_id"].value
+            key: input.attributes["data_id"].value,
+            saveThis: true
           }
         };
-      //fill map
+      }
       if (input.name == "predicate") {
-        map[input.attributes["data_id"].value].old.predicate = input.attributes["data_original"].value;
-        map[input.attributes["data_id"].value].new.predicate = input.value;
+        changes[input.attributes["data_id"].value].old.predicate = input.attributes["data_original"].value;
+        changes[input.attributes["data_id"].value].new.predicate = input.value;
       } else {
-        map[input.attributes["data_id"].value].old.object = input.attributes["data_original"].value;
-        map[input.attributes["data_id"].value].new.object = input.value;
+        changes[input.attributes["data_id"].value].old.object = input.attributes["data_original"].value;
+        changes[input.attributes["data_id"].value].new.object = input.value;
+      }
+      if ($(input).hasClass("new")) {
+        changes[input.attributes["data_id"].value].old.saveThis = false;
+      }
+      if ($(input).hasClass("remove")) {
+        changes[input.attributes["data_id"].value].new.saveThis = false;
       }
     });
 
     //transform map
-    for (var key in map) {
-      FBE.Deletions.push(map[key].old);
-      FBE.Inserts.push(map[key].new);
+    console.log(changes);
+    for (var key in changes) {
+      if (changes[key].old.saveThis === true) FBE.Deletions.push(changes[key].old);
+      if (changes[key].new.saveThis === true) FBE.Inserts.push(changes[key].new);
     }
-    console.log(FBE.Deletions);
   },
 
   arrowFunctionsAvaiable: function() {
