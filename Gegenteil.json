@@ -1,0 +1,109 @@
+{
+  "http://de.dbpedia.org/resource/Gegenteil" : {
+    "http://dbpedia.org/ontology/wikiPageWikiLink" : [ {
+      "type" : "uri" ,
+      "value" : "http://de.dbpedia.org/resource/Kategorie:Abstraktum"
+    }
+    , {
+      "type" : "uri" ,
+      "value" : "http://de.dbpedia.org/resource/Negation"
+    }
+    , {
+      "type" : "uri" ,
+      "value" : "http://de.dbpedia.org/resource/Sprachwissenschaft"
+    }
+    , {
+      "type" : "uri" ,
+      "value" : "http://de.dbpedia.org/resource/Umgangssprache"
+    }
+    , {
+      "type" : "uri" ,
+      "value" : "http://de.dbpedia.org/resource/Gegensatz"
+    }
+    , {
+      "type" : "uri" ,
+      "value" : "http://de.dbpedia.org/resource/Antonym"
+    }
+    , {
+      "type" : "uri" ,
+      "value" : "http://de.dbpedia.org/resource/Komplement_(Mengenlehre)"
+    }
+     ] ,
+    "http://www.w3.org/ns/prov#wasDerivedFrom" : [ {
+      "type" : "uri" ,
+      "value" : "http://de.wikipedia.org/wiki/Gegenteil?oldid=142331468"
+    }
+     ] ,
+    "http://dbpedia.org/ontology/wikiPageRevisionID" : [ {
+      "type" : "literal" ,
+      "value" : "142331468" ,
+      "datatype" : "http://www.w3.org/2001/XMLSchema#integer"
+    }
+     ] ,
+    "http://www.w3.org/2000/01/rdf-schema#label" : [ {
+      "type" : "literal" ,
+      "value" : "Gegenteil" ,
+      "lang" : "de"
+    }
+     ] ,
+    "http://dbpedia.org/ontology/wikiPageExternalLink" : [ {
+      "type" : "uri" ,
+      "value" : "http://was-ist-das-gegenteil-von.de/"
+    }
+     ] ,
+    "http://de.dbpedia.org/property/wikiPageUsesTemplate" : [ {
+      "type" : "uri" ,
+      "value" : "http://de.dbpedia.org/resource/Vorlage:Wiktionary"
+    }
+     ] ,
+    "http://xmlns.com/foaf/0.1/isPrimaryTopicOf" : [ {
+      "type" : "uri" ,
+      "value" : "http://de.wikipedia.org/wiki/Gegenteil"
+    }
+     ] ,
+    "http://dbpedia.org/ontology/wikiPageLength" : [ {
+      "type" : "literal" ,
+      "value" : "1493" ,
+      "datatype" : "http://www.w3.org/2001/XMLSchema#integer"
+    }
+     ] ,
+    "http://dbpedia.org/ontology/abstract" : [ {
+      "type" : "literal" ,
+      "value" : "Das Gegenteil einer Sache oder einer Eigenschaft ist umgangssprachlich meistens eine Sache oder eine Eigenschaft, die von der erstgenannten eine Art Spiegelung eines gedachten Mittelpunktes darstellt.So w��re also umgangssprachlich das Gegenteil von gro�� klein, weil gro�� und klein gef��hlt gleich weit weg sind vom gedachten Mittelpunkt \u201Enormalgro��\u201C. Das Gegenteil von winzig w��re allerdings riesig, da der gef��hlte Abstand von winzig zu normalgro�� als gr����er empfunden wird, als dies bei dem einfachen \u201Eklein\u201C der Fall w��re.In der Sprachwissenschaft ist mit Gegenteil ein Gegenbegriff oder Gegenwort gemeint, das als Antonym bezeichnet wird. Es werden verschiedene Arten von Antonymien unterschieden. Antonym = Gegenteil. (Das Antonym von Synonym ist Antonym.)Mathematisch gesehen ist das Gegenteil einer Menge die komplement��re Menge bzw. das Gegenteil einer Aussage die negierte Aussage.In der Philosophie unterscheidet man seit Aristoteles vier Arten von Gegenteilen bzw. des logischen Gegensatzes: den kontradiktorischen (z. B. wei�� \u2013 nicht wei��) den kontr��ren (z. B. wei�� \u2013 schwarz) den privativen (z. B. sehend \u2013 blind) den relativen (z. B. doppelt \u2013 halb)" ,
+      "lang" : "de"
+    }
+     ] ,
+    "http://www.w3.org/2000/01/rdf-schema#comment" : [ {
+      "type" : "literal" ,
+      "value" : "Das Gegenteil einer Sache oder einer Eigenschaft ist umgangssprachlich meistens eine Sache oder eine Eigenschaft, die von der erstgenannten eine Art Spiegelung eines gedachten Mittelpunktes darstellt.So w��re also umgangssprachlich das Gegenteil von gro�� klein, weil gro�� und klein gef��hlt gleich weit weg sind vom gedachten Mittelpunkt \u201Enormalgro��\u201C." ,
+      "lang" : "de"
+    }
+     ] ,
+    "http://dbpedia.org/ontology/wikiPageID" : [ {
+      "type" : "literal" ,
+      "value" : "171679" ,
+      "datatype" : "http://www.w3.org/2001/XMLSchema#integer"
+    }
+     ] ,
+    "http://purl.org/dc/terms/subject" : [ {
+      "type" : "uri" ,
+      "value" : "http://de.dbpedia.org/resource/Kategorie:Abstraktum"
+    }
+     ] ,
+    "http://www.w3.org/2002/07/owl#sameAs" : [ {
+      "type" : "uri" ,
+      "value" : "http://wikidata.dbpedia.org/resource/Q1498321"
+    }
+    , {
+      "type" : "uri" ,
+      "value" : "http://wikidata.org/entity/Q1498321"
+    }
+     ] ,
+    "http://dbpedia.org/ontology/wikiPageOutDegree" : [ {
+      "type" : "literal" ,
+      "value" : "8" ,
+      "datatype" : "http://www.w3.org/2001/XMLSchema#integer"
+    }
+     ]
+  }
+}

@@ -1,20 +1,20 @@
 var FBE_Factory = {
-  listEntry: function(id, subject, predicate, object) {
+  listEntry: function(id, subject, predicate, object, hint) {
     var html = '<div id="feedbackListEntry'+id+'" data-id="' + id + '">' +
       ' <div class="form-group">' +
       '   <input type="text" class="form-control" name="predicate" data_original="' + predicate + '" value="' + predicate + '" readonly size="34">' +
       ' </div>' +
       ' <div class="form-group">' +
-      '   <input type="text" class="form-control" name="object" data_original="' + object.replace("\"", "") + '" value="' + object.replace("\"", "") + '" readonly size="44">' +
+      '   <input type="text" class="form-control" name="object" data_original="' + object.replace("\"", "") + '" value="' + object.replace("\"", "") + '" title="'+hint+'" readonly size="44">' +
       ' </div>' +
-      ' <button class="btn btn-default"><i class="fa fa-edit"></i> Ändern</button>' +
+      ' <button class="btn btn-default"><i class="fa fa-edit"></i> &Auml;ndern</button>' +
       '</div>';
 
     return html;
   },
 
-  listEntryFromRDF: function(i, element) {
-    return FBE_Factory.listEntry(i, element.subject, element.predicate, element.object);
+  listEntryFromRDF: function(i, element, hint) {
+    return FBE_Factory.listEntry(i, element.subject, element.predicate, element.object, hint);
   },
 
   getModal: function() {
@@ -83,6 +83,7 @@ var FBE = {
   Deletions: [],
   Inserts: [],
   RessourceTuples: [],
+  RDFJSONObject: "",
 
   addFeedbackButton: function() {
     $("body").append('<button id="feedbackButton" type="button" class="btn btn-primary">Give Feedback</button>');
@@ -105,55 +106,63 @@ var FBE = {
   },
 
   getTriples: function() {
-    //"http://de.dbpedia.org/data/" + FBE.ressourceName + ".n3"
-    $.get("./" + FBE.ressourceName + ".n3")
+    //debug
+    if (location.toString().startsWith("file://") || location.toString().startsWith("http://kdi-student.de"))
+    {
+      FBE.getTriplesFromFile();
+      return;
+    }
+
+    //prepare url for GET
+    var url = location.toString();
+    if (url.substring(url.length-1, url.length) !== "?")
+      url += "?";
+
+    $.get(url + "output=application%2Frdf%2Bjson")
       .done(function(data, text, jqxhr) {
         console.log(data);
-        FBE.parseNewTriples(data);
+        FBE.parseAndUseNewTriples(data);
+      })
+      .fail(function(jqxhr, textStatus, error) {
+        console.log(textStatus + " " + error);
+
+        //TODO have to be removed
+        FBE.getTriplesFromFile();
+      });
+  },
+
+  //function for debugging file requests
+  getTriplesFromFile: function() {
+    $.get("Gegenteil.json")
+      .done(function(data, text, jqxhr) {
+        console.log(data);
+        FBE.parseAndUseNewTriples(data);
       })
       .fail(function(jqxhr, textStatus, error) {
         console.log(textStatus + " " + error);
         //TODO has to be removed
-        FBE.parseNewTriples(myn3___);
+        //FBE.parseNewTriples(myn3___);
         //TODO show error message
         //TODO hide progress bar
         //$("#feedbackModal_progressbar").hide();
       });
   },
 
-  //Transforms RDF JSON from DBPedia to an object for the list view
-  //IDEA N3 Lib is only used in here....maybe we can avoid N3 Lib at all?!
-  parseNewTriples: function(data) {
-    var parser = N3.Parser({
-      format: 'turtle'
-    });
+  //use RDF JSON object from DBPedia to create HTML for the list
+  parseAndUseNewTriples: function(data) {
+    FBE.RDFJSONObject = data;
 
-    parser.parse(data, function(error, triple, prefixes) {
-      //console.log(triple, prefixes, error);
-      if (triple)
-        FBE.RessourceTuples.push(triple);
-      else {
-        FBE.cleanupNewTriples();
-      }
-    });
-  },
+    var firstKey = Object.keys(data)[0];
+    var triples = data[firstKey];
 
-  //remove unnecessary elements from RessourceTuples
-  cleanupNewTriples: function() {
-    var namespace = FBE.RessourceTuples
-      .filter(tuple => tuple.subject == FBE.ressourceNamespace + FBE.ressourceName)[0]
-      .object;
+    var listEntries = "";
 
-    if (namespace !== "") {
-      FBE.RessourceTuples = FBE.RessourceTuples.filter(tuple => tuple.subject == namespace);
-      FBE.showNewTriples();
+    for (var key in triples) {
+      var value = triples[key];
+
+      listEntries = value.map((element, i) => FBE_Factory.listEntry(i + 1, firstKey, key, element.value, element.type + ( (element.datatype) ? ": "+element.datatype : "" )) + "<br>")
+                        .reduce((prev, curr) => prev + curr, listEntries);
     }
-  },
-
-  showNewTriples: function() {
-    var listEntries = FBE.RessourceTuples
-      .map((element, i) => FBE_Factory.listEntryFromRDF(i + 1, element) + "<br>")
-      .reduce((prev, curr) => prev + curr);
 
     $("#feedbackEntryList").append(listEntries);
     $("#feedbackModal_progressbar").hide();
