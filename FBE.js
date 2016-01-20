@@ -7,8 +7,8 @@ var FBE_Factory = {
       ' <div class="form-group">' +
       '   <input type="text" class="form-control" name="object" data_id="' + id + '" data_original="' + object.replace('"', "&quot;") + '" value="' + object.replace('"', "&quot;") + '" readonly size="50">' +
       ' </div>' +
-      ' <button class="btn btn-default feedbackEdit"><i class="fa fa-edit"></i></button>' +
-      ' <button class="btn btn-default feedbackRemove"><i class="fa fa-remove"></i></button>' +
+      ' <button class="btn btn-info feedbackEdit"><i class="fa fa-edit"></i></button>' +
+      ' <button class="btn btn-danger feedbackRemove"><i class="fa fa-remove"></i></button>' +
       '</div>';
 
     return html;
@@ -79,8 +79,18 @@ var FBE_Handler = {
     event.preventDefault();
     var id = $(event.target).closest("div").attr("id");
     $("#" + id + " > div > input").prop("readonly", false);
+    $("#" + id + " > div > input").addClass("remove");
     $("#" + id).hide();
     $("#" + id).next().hide();
+  },
+
+  addTriple: function(event) {
+    event.preventDefault();
+    var id = parseInt($("#feedbackEntryList > div:last").attr("data_id"))+1;
+    var entry = FBE_Factory.listEntry(id, "namespace", "", "") + '<br>';
+    $("#feedbackEntryList").find(".feedbackAdd").before(entry);
+    $("#feedbackEntryList #feedbackListEntry" + id + " > button.feedbackEdit").click();
+    $("#feedbackEntryList #feedbackListEntry" + id + " input").addClass("new");
   }
 };
 
@@ -117,15 +127,14 @@ var FBE = {
 
   getTriples: function() {
     //debug
-    if (location.toString().startsWith("file://") || location.toString().startsWith("http://kdi-student.de"))
-    {
+    if (location.toString().startsWith("file://") || location.toString().startsWith("http://kdi-student.de") || location.toString().startsWith("http://localhost")) {
       FBE.getTriplesFromFile();
       return;
     }
 
     //prepare url for GET
     var url = location.toString();
-    if (url.substring(url.length-1, url.length) !== "?")
+    if (url.substring(url.length - 1, url.length) !== "?")
       url += "?";
 
     $.get(url + "output=application%2Frdf%2Bjson")
@@ -188,6 +197,8 @@ var FBE = {
     }
 
     $("#feedbackEntryList").append(listEntries);
+    $("#feedbackEntryList").append('<button class="btn btn-success feedbackAdd"><i class="fa fa-plus"></i> Add Element</button>');
+    $("#feedbackEntryList").find(".feedbackAdd").click(FBE_Handler.addTriple);
     $("#feedbackModal_progressbar").hide();
   },
 
@@ -209,10 +220,10 @@ var FBE = {
       '    eccrev:commitAuthor <mailto:' + $("#feedbackFormAuthor").val() + '>;\n' +
       '    eccrev:commitMessage "' + $("#feedbackFormMessage").val() + '";\n' +
       '    prov:atTime "' + new Date().toISOString() + '"^^xsd:dateTime;\n' + //Format: 2015-12-17T13:37:00+01:00
-      '    sioc:reply_of ' + FBE.ressourceNamespace + FBE.ressourceName + ';\n' +
+      '    sioc:reply_of ' + FBE.checkForAngleBrackets(FBE.ressourceNamespace + FBE.ressourceName) + ';\n' +
       '    eccrev:sha256 "' + SHA256_hash(del + insert) + '"^^xsd:base64Binary.\n' +
       '  eccrev:revision-' + revisionRevision + ' a eccrev:Revision;\n' +
-      '    sioc:reply_of ' + FBE.ressourceNamespace + FBE.ressourceName + ';\n' +
+      '    sioc:reply_of ' + FBE.checkForAngleBrackets(FBE.ressourceNamespace + FBE.ressourceName) + ';\n' +
       '    eccrev:deltaDelete ex:delete-' + deleteRevision + ';\n' +
       '    eccrev:deltaInsert ex:insert-' + insertRevision + '\n' +
       '}\n';
@@ -224,7 +235,7 @@ var FBE = {
     var inserts = "";
     if (FBE.Inserts.length !== 0) {
       inserts = FBE.Inserts
-        .map(obj => obj.subject + ' ' + obj.predicate + ' ' + obj.object + '.\n')
+        .map(obj => FBE.checkForAngleBrackets(obj.subject) + ' ' + FBE.checkForAngleBrackets(obj.predicate) + ' ' + FBE.checkForAngleBrackets(obj.object) + '.\n')
         .reduce((prev, curr, _) => prev + curr).slice(0, -2);
     }
     return (' { ' + inserts + ' }');
@@ -234,10 +245,17 @@ var FBE = {
     var deletions = "";
     if (FBE.Deletions.length !== 0) {
       deletions = FBE.Deletions
-        .map(obj => obj.subject + ' ' + obj.predicate + ' ' + obj.object + '.\n')
+        .map(obj => FBE.checkForAngleBrackets(obj.subject) + ' ' + FBE.checkForAngleBrackets(obj.predicate) + ' ' + FBE.checkForAngleBrackets(obj.object) + '.\n')
         .reduce((prev, curr, _) => prev + curr).slice(0, -2);
     }
     return ('{ ' + deletions + ' }\n');
+  },
+
+  checkForAngleBrackets: function(str) {
+    if (str.startsWith("http"))
+      return "<" + str + ">";
+    else
+      return str;
   },
 
   //publish the new ressource like descripted in the paper of Natanael
@@ -269,36 +287,43 @@ var FBE = {
     //fill Deletions and Inserts
     //FIXME very annoying, because JS got Maps and this is not such a map. See https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Map
 
-    var map = {};
+    var changes = {};
     filteredInputs.forEach(function(input) {
-      //init map
-      if (map[input.attributes["data_id"].value] === undefined)
-        map[input.attributes["data_id"].value] = {
+      if (changes[input.attributes["data_id"].value] === undefined) {
+        changes[input.attributes["data_id"].value] = {
           old: {
             subject: FBE.ressourceNamespace + FBE.ressourceName,
-            key: input.attributes["data_id"].value
+            key: input.attributes["data_id"].value,
+            saveThis: true
           },
           new: {
             subject: FBE.ressourceNamespace + FBE.ressourceName,
-            key: input.attributes["data_id"].value
+            key: input.attributes["data_id"].value,
+            saveThis: true
           }
         };
-      //fill map
+      }
       if (input.name == "predicate") {
-        map[input.attributes["data_id"].value].old.predicate = input.attributes["data_original"].value;
-        map[input.attributes["data_id"].value].new.predicate = input.value;
+        changes[input.attributes["data_id"].value].old.predicate = input.attributes["data_original"].value;
+        changes[input.attributes["data_id"].value].new.predicate = input.value;
       } else {
-        map[input.attributes["data_id"].value].old.object = input.attributes["data_original"].value;
-        map[input.attributes["data_id"].value].new.object = input.value;
+        changes[input.attributes["data_id"].value].old.object = input.attributes["data_original"].value;
+        changes[input.attributes["data_id"].value].new.object = input.value;
+      }
+      if ($(input).hasClass("new")) {
+        changes[input.attributes["data_id"].value].old.saveThis = false;
+      }
+      if ($(input).hasClass("remove")) {
+        changes[input.attributes["data_id"].value].new.saveThis = false;
       }
     });
 
     //transform map
-    for (var key in map) {
-      FBE.Deletions.push(map[key].old);
-      FBE.Inserts.push(map[key].new);
+    console.log(changes);
+    for (var key in changes) {
+      if (changes[key].old.saveThis === true) FBE.Deletions.push(changes[key].old);
+      if (changes[key].new.saveThis === true) FBE.Inserts.push(changes[key].new);
     }
-    console.log(FBE.Deletions);
   },
 
   arrowFunctionsAvaiable: function() {
