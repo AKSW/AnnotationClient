@@ -1,13 +1,14 @@
 var FBE_Factory = {
   listEntry: function(id, subject, predicate, object) {
-    var html = '<div id="feedbackListEntry' + id + '" data-id="' + id + '">' +
+    var html = '<div id="feedbackListEntry' + id + '" data_id="' + id + '">' +
       ' <div class="form-group">' +
       '   <input type="text" class="form-control" name="predicate" data_id="' + id + '" data_original="' + predicate + '" value="' + predicate + '" readonly size="37>' +
       ' </div>' +
       ' <div class="form-group">' +
       '   <input type="text" class="form-control" name="object" data_id="' + id + '" data_original="' + object.replace("\"", "") + '" value="' + object.replace("\"", "") + '" readonly size="50">' +
       ' </div>' +
-      ' <button class="btn btn-default"><i class="fa fa-edit"></i> Ändern</button>' +
+      ' <button class="btn btn-default feedbackEdit"><i class="fa fa-edit"></i></button>' +
+      ' <button class="btn btn-default feedbackRemove"><i class="fa fa-remove"></i></button>' +
       '</div>';
 
     return html;
@@ -69,9 +70,17 @@ var FBE_Handler = {
 
   activateEditMode: function(event) {
     event.preventDefault();
-    var id = $(event.target).parent("div").data("id");
-    $("#feedbackListEntry" + id + " > div > input").prop("readonly", false);
-    $(event.target).hide();
+    var id = $(event.target).closest("div").attr("id");
+    $("#" + id + " > div > input").prop("readonly", false);
+    $("#" + id).find(".feedbackEdit").hide();
+  },
+
+  removeTriple: function(event) {
+    event.preventDefault();
+    var id = $(event.target).closest("div").attr("id");
+    $("#" + id + " > div > input").prop("readonly", false);
+    $("#" + id).hide();
+    $("#" + id).next().hide();
   }
 };
 
@@ -91,7 +100,8 @@ var FBE = {
 
   createFeedbackModal: function() {
     $("body").append(FBE_Factory.getModal());
-    $("#feedbackEntryList").on("click", "button", FBE_Handler.activateEditMode);
+    $("#feedbackEntryList").on("click", "button.feedbackEdit", FBE_Handler.activateEditMode);
+    $("#feedbackEntryList").on("click", "button.feedbackRemove", FBE_Handler.removeTriple);
     $("#feedbackForm").submit(FBE_Handler.sendFeedback);
     FBE.fillFeedbackModal();
   },
