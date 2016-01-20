@@ -1,11 +1,11 @@
 var FBE_Factory = {
-  listEntry: function(id, subject, predicate, object, hint) {
+  listEntry: function(id, subject, predicate, object) {
     var html = '<div id="feedbackListEntry'+id+'" data-id="' + id + '">' +
       ' <div class="form-group">' +
       '   <input type="text" class="form-control" name="predicate" data_id="' + id + '" data_original="' + predicate + '" value="' + predicate + '" readonly size="37>' +
       ' </div>' +
       ' <div class="form-group">' +
-      '   <input type="text" class="form-control" name="object" data_id="' + id + '" data_original="' + object.replace("\"", "") + '" value="' + object.replace("\"", "") + '" title="'+hint+'"  readonly size="50">' +
+      '   <input type="text" class="form-control" name="object" data_id="' + id + '" data_original="' + object.replace('"', "&quot;") + '" value="' + object.replace('"', "&quot;") + '" readonly size="50">' +
       ' </div>' +
       ' <button class="btn btn-default feedbackEdit"><i class="fa fa-edit"></i></button>' +
       ' <button class="btn btn-default feedbackRemove"><i class="fa fa-remove"></i></button>' +
@@ -14,8 +14,8 @@ var FBE_Factory = {
     return html;
   },
 
-  listEntryFromRDF: function(i, element, hint) {
-    return FBE_Factory.listEntry(i, element.subject, element.predicate, element.object, hint);
+  listEntryFromRDF: function(i, element) {
+    return FBE_Factory.listEntry(i, element.subject, element.predicate, element.object);
   },
 
   getModal: function() {
@@ -171,7 +171,17 @@ var FBE = {
     for (var key in triples) {
       var value = triples[key];
 
-      listEntries = value.map((element, i) => FBE_Factory.listEntry(i + counter, firstKey, key, element.value, element.type + ( (element.datatype) ? ": "+element.datatype : "" )) + "<br>")
+      listEntries = value.map((element, i) => {
+                            var obj = element.value;
+                            if (element.datatype !== undefined && element.datatype !== null)
+                              obj = '&quot;' + element.value + '&quot;^^<' + element.datatype + ">";
+
+                            return FBE_Factory.listEntry(i + counter,
+                              firstKey,
+                              key,
+                              obj)
+                            + "<br>";
+                          })
                         .reduce((prev, curr) => prev + curr, listEntries);
 
       counter += Object.keys(value).length;
@@ -230,6 +240,7 @@ var FBE = {
     return ('{ ' + deletions + ' }\n');
   },
 
+  //publish the new ressource like descripted in the paper of Natanael
   sendFeedback: function(trig) {
     console.log(trig);
     // TODO Post to Resource Hosting Service
