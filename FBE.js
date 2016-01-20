@@ -7,8 +7,8 @@ var FBE_Factory = {
       ' <div class="form-group">' +
       '   <input type="text" class="form-control" name="object" data_id="' + id + '" data_original="' + object.replace("\"", "") + '" value="' + object.replace("\"", "") + '" readonly size="50">' +
       ' </div>' +
-      ' <button class="btn btn-default feedbackEdit"><i class="fa fa-edit"></i></button>' +
-      ' <button class="btn btn-default feedbackRemove"><i class="fa fa-remove"></i></button>' +
+      ' <button class="btn btn-info feedbackEdit"><i class="fa fa-edit"></i></button>' +
+      ' <button class="btn btn-danger feedbackRemove"><i class="fa fa-remove"></i></button>' +
       '</div>';
 
     return html;
@@ -79,8 +79,17 @@ var FBE_Handler = {
     event.preventDefault();
     var id = $(event.target).closest("div").attr("id");
     $("#" + id + " > div > input").prop("readonly", false);
+    $("#" + id + " > div > input").addClass("remove");
     $("#" + id).hide();
     $("#" + id).next().hide();
+  },
+
+  addTriple: function(event) {
+    event.preventDefault();
+    var id = parseInt($("#feedbackEntryList > div:last").attr("data_id")) + 1;
+    var entry = FBE_Factory.listEntry(id, "namespace", "", "")+'<br>';
+    $("#feedbackEntryList").find(".feedbackAdd").before(entry);
+    $("#feedbackEntryList #feedbackListEntry" + id + " > button.feedbackEdit").click();
   }
 };
 
@@ -166,6 +175,8 @@ var FBE = {
       .reduce((prev, curr) => prev + curr);
 
     $("#feedbackEntryList").append(listEntries);
+    $("#feedbackEntryList").append('<button class="btn btn-success feedbackAdd"><i class="fa fa-plus"></i> Add Element</button>');
+    $("#feedbackEntryList").find(".feedbackAdd").click(FBE_Handler.addTriple);
     $("#feedbackModal_progressbar").hide();
   },
 
