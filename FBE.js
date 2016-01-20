@@ -103,6 +103,9 @@ var FBE = {
   Inserts: [],
   RessourceTuples: [],
   RDFJSONObject: "",
+  URL_RHS: "",
+  available_URI: "",
+  URL_SPE: "",
 
   addFeedbackButton: function() {
     $("body").append('<button id="feedbackButton" type="button" class="btn btn-primary">Give Feedback</button>');
@@ -261,6 +264,36 @@ var FBE = {
   //publish the new ressource like descripted in the paper of Natanael
   sendFeedback: function(trig) {
     console.log(trig);
+
+    //get identifier from ressource hosting service
+    $.get(FBR.URL_RHS)
+      .done(function(data, text, jqxhr) {
+        console.log(data);
+
+        //save URI
+        FBE.available_URI = data.availableURI;
+
+        //use new URI for saving ressource
+        $ajax({
+          url: FBE.available_URI,
+          method: "PUT",
+          data: trig,
+          dataType: "n3",
+          cache: false
+        })
+        .done(function(data, text, jqxhr) {
+          console.log(data);
+
+          FBE.pingSemanticPingbackEndpoint();
+        })
+        .fail(function(jqxhr, textStatus, error) {
+          console.log(textStatus + " " + error);
+        });
+      })
+      .fail(function(jqxhr, textStatus, error) {
+        console.log(textStatus + " " + error);
+      });
+
     // TODO Post to Resource Hosting Service
     /*
     $.post(url, trig, null, "application/trig")
@@ -271,6 +304,16 @@ var FBE = {
       .done(function() {})
       .fail(function() {});
     */
+  },
+
+  pingSemanticPingbackEndpoint: function() {
+    $.get(FBE.URL_SPE+FBE.available_URI)
+    .done(function(data, text, jqxhr) {
+        console.log(data);
+      })
+      .fail(function(jqxhr, textStatus, error) {
+        console.log(textStatus + " " + error);
+      });
   },
 
   //update FBE.Deletions and FBE.Inserts
