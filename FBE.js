@@ -1,11 +1,11 @@
 var FBE_Factory = {
   listEntry: function(id, subject, predicate, object) {
-    var html = '<div id="feedbackListEntry'+id+'" data-id="' + id + '">' +
+    var html = '<div id="feedbackListEntry' + id + '" data-id="' + id + '">' +
       ' <div class="form-group">' +
-      '   <input type="text" class="form-control" name="predicate" data_original="' + predicate + '" value="' + predicate + '" readonly size="34">' +
+      '   <input type="text" class="form-control" name="predicate" data_id="' + id + '" data_original="' + predicate + '" value="' + predicate + '" readonly size="34">' +
       ' </div>' +
       ' <div class="form-group">' +
-      '   <input type="text" class="form-control" name="object" data_original="' + object.replace("\"", "") + '" value="' + object.replace("\"", "") + '" readonly size="44">' +
+      '   <input type="text" class="form-control" name="object" data_id="' + id + '" data_original="' + object.replace("\"", "") + '" value="' + object.replace("\"", "") + '" readonly size="44">' +
       ' </div>' +
       ' <button class="btn btn-default"><i class="fa fa-edit"></i> Ändern</button>' +
       '</div>';
@@ -189,16 +189,22 @@ var FBE = {
   },
 
   getInserts: function() {
-    var inserts = FBE.Inserts
-      .map(obj => obj.subject + ' ' + obj.predicate + ' ' + obj.object + '.\n')
-      .reduce((prev, curr, _) => prev + curr).slice(0, -2);
+    var inserts = "";
+    if (FBE.Inserts.length !== 0) {
+      inserts = FBE.Inserts
+        .map(obj => obj.subject + ' ' + obj.predicate + ' ' + obj.object + '.\n')
+        .reduce((prev, curr, _) => prev + curr).slice(0, -2);
+    }
     return (' { ' + inserts + ' }');
   },
 
   getDeletes: function() {
-    var deletions = FBE.Deletions
-      .map(obj => obj.subject + ' ' + obj.predicate + ' ' + obj.object + '.\n')
-      .reduce((prev, curr, _) => prev + curr).slice(0, -2);
+    var deletions = "";
+    if (FBE.Deletions.length !== 0) {
+      deletions = FBE.Deletions
+        .map(obj => obj.subject + ' ' + obj.predicate + ' ' + obj.object + '.\n')
+        .reduce((prev, curr, _) => prev + curr).slice(0, -2);
+    }
     return ('{ ' + deletions + ' }\n');
   },
 
@@ -221,7 +227,7 @@ var FBE = {
     FBE.Deletions = [];
     FBE.Inserts = [];
 
-    var inputs = $(".feedbackModal_list_entry_TYPE").find("input");
+    var inputs = $("#feedbackEntryList").find("input");
     var filteredInputs = inputs.toArray().filter(input => input.attributes.readonly === undefined);
 
     if (filteredInputs.length === 0)
@@ -229,28 +235,28 @@ var FBE = {
 
     //fill Deletions and Inserts
     //FIXME very annoying, because JS got Maps and this is not such a map. See https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Map
+
     var map = {};
     filteredInputs.forEach(function(input) {
       //init map
-      if (map[input.attributes["data_index"].value] === undefined)
-        map[input.attributes["data_index"].value] = {
+      if (map[input.attributes["data_id"].value] === undefined)
+        map[input.attributes["data_id"].value] = {
           old: {
             subject: FBE.ressourceNamespace + FBE.ressourceName,
-            key: input.attributes["data_index"].value
+            key: input.attributes["data_id"].value
           },
           new: {
             subject: FBE.ressourceNamespace + FBE.ressourceName,
-            key: input.attributes["data_index"].value
+            key: input.attributes["data_id"].value
           }
         };
-
       //fill map
       if (input.name == "predicate") {
-        map[input.attributes["data_index"].value].old.predicate = input.attributes["data_original"].value;
-        map[input.attributes["data_index"].value].new.predicate = input.value;
+        map[input.attributes["data_id"].value].old.predicate = input.attributes["data_original"].value;
+        map[input.attributes["data_id"].value].new.predicate = input.value;
       } else {
-        map[input.attributes["data_index"].value].old.object = input.attributes["data_original"].value;
-        map[input.attributes["data_index"].value].new.object = input.value;
+        map[input.attributes["data_id"].value].old.object = input.attributes["data_original"].value;
+        map[input.attributes["data_id"].value].new.object = input.value;
       }
     });
 
@@ -259,6 +265,7 @@ var FBE = {
       FBE.Deletions.push(map[key].old);
       FBE.Inserts.push(map[key].new);
     }
+    console.log(FBE.Deletions);
   },
 
   arrowFunctionsAvaiable: function() {
