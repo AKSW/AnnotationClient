@@ -2,12 +2,13 @@ var FBE_Factory = {
   listEntry: function(id, subject, predicate, object, hint) {
     var html = '<div id="feedbackListEntry'+id+'" data-id="' + id + '">' +
       ' <div class="form-group">' +
-      '   <input type="text" class="form-control" name="predicate" data_original="' + predicate + '" value="' + predicate + '" readonly size="34">' +
+      '   <input type="text" class="form-control" name="predicate" data_id="' + id + '" data_original="' + predicate + '" value="' + predicate + '" readonly size="37>' +
       ' </div>' +
       ' <div class="form-group">' +
-      '   <input type="text" class="form-control" name="object" data_original="' + object.replace("\"", "") + '" value="' + object.replace("\"", "") + '" title="'+hint+'" readonly size="44">' +
+      '   <input type="text" class="form-control" name="object" data_id="' + id + '" data_original="' + object.replace("\"", "") + '" value="' + object.replace("\"", "") + '" title="'+hint+'"  readonly size="50">' +
       ' </div>' +
-      ' <button class="btn btn-default"><i class="fa fa-edit"></i> &Auml;ndern</button>' +
+      ' <button class="btn btn-default feedbackEdit"><i class="fa fa-edit"></i></button>' +
+      ' <button class="btn btn-default feedbackRemove"><i class="fa fa-remove"></i></button>' +
       '</div>';
 
     return html;
@@ -69,9 +70,17 @@ var FBE_Handler = {
 
   activateEditMode: function(event) {
     event.preventDefault();
-    var id = $(event.target).parent("div").data("id");
-    $("#feedbackListEntry" + id + " > div > input").prop("readonly", false);
-    $(event.target).hide();
+    var id = $(event.target).closest("div").attr("id");
+    $("#" + id + " > div > input").prop("readonly", false);
+    $("#" + id).find(".feedbackEdit").hide();
+  },
+
+  removeTriple: function(event) {
+    event.preventDefault();
+    var id = $(event.target).closest("div").attr("id");
+    $("#" + id + " > div > input").prop("readonly", false);
+    $("#" + id).hide();
+    $("#" + id).next().hide();
   }
 };
 
@@ -92,7 +101,8 @@ var FBE = {
 
   createFeedbackModal: function() {
     $("body").append(FBE_Factory.getModal());
-    $("#feedbackEntryList").on("click", "button", FBE_Handler.activateEditMode);
+    $("#feedbackEntryList").on("click", "button.feedbackEdit", FBE_Handler.activateEditMode);
+    $("#feedbackEntryList").on("click", "button.feedbackRemove", FBE_Handler.removeTriple);
     $("#feedbackForm").submit(FBE_Handler.sendFeedback);
     FBE.fillFeedbackModal();
   },
@@ -156,12 +166,15 @@ var FBE = {
     var triples = data[firstKey];
 
     var listEntries = "";
+    var counter = 1;
 
     for (var key in triples) {
       var value = triples[key];
 
-      listEntries = value.map((element, i) => FBE_Factory.listEntry(i + 1, firstKey, key, element.value, element.type + ( (element.datatype) ? ": "+element.datatype : "" )) + "<br>")
+      listEntries = value.map((element, i) => FBE_Factory.listEntry(i + counter, firstKey, key, element.value, element.type + ( (element.datatype) ? ": "+element.datatype : "" )) + "<br>")
                         .reduce((prev, curr) => prev + curr, listEntries);
+
+      counter += Object.keys(value).length;
     }
 
     $("#feedbackEntryList").append(listEntries);
@@ -198,16 +211,22 @@ var FBE = {
   },
 
   getInserts: function() {
-    var inserts = FBE.Inserts
-      .map(obj => obj.subject + ' ' + obj.predicate + ' ' + obj.object + '.\n')
-      .reduce((prev, curr, _) => prev + curr).slice(0, -2);
+    var inserts = "";
+    if (FBE.Inserts.length !== 0) {
+      inserts = FBE.Inserts
+        .map(obj => obj.subject + ' ' + obj.predicate + ' ' + obj.object + '.\n')
+        .reduce((prev, curr, _) => prev + curr).slice(0, -2);
+    }
     return (' { ' + inserts + ' }');
   },
 
   getDeletes: function() {
-    var deletions = FBE.Deletions
-      .map(obj => obj.subject + ' ' + obj.predicate + ' ' + obj.object + '.\n')
-      .reduce((prev, curr, _) => prev + curr).slice(0, -2);
+    var deletions = "";
+    if (FBE.Deletions.length !== 0) {
+      deletions = FBE.Deletions
+        .map(obj => obj.subject + ' ' + obj.predicate + ' ' + obj.object + '.\n')
+        .reduce((prev, curr, _) => prev + curr).slice(0, -2);
+    }
     return ('{ ' + deletions + ' }\n');
   },
 
@@ -230,7 +249,7 @@ var FBE = {
     FBE.Deletions = [];
     FBE.Inserts = [];
 
-    var inputs = $(".feedbackModal_list_entry_TYPE").find("input");
+    var inputs = $("#feedbackEntryList").find("input");
     var filteredInputs = inputs.toArray().filter(input => input.attributes.readonly === undefined);
 
     if (filteredInputs.length === 0)
@@ -238,28 +257,28 @@ var FBE = {
 
     //fill Deletions and Inserts
     //FIXME very annoying, because JS got Maps and this is not such a map. See https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Map
+
     var map = {};
     filteredInputs.forEach(function(input) {
       //init map
-      if (map[input.attributes["data_index"].value] === undefined)
-        map[input.attributes["data_index"].value] = {
+      if (map[input.attributes["data_id"].value] === undefined)
+        map[input.attributes["data_id"].value] = {
           old: {
             subject: FBE.ressourceNamespace + FBE.ressourceName,
-            key: input.attributes["data_index"].value
+            key: input.attributes["data_id"].value
           },
           new: {
             subject: FBE.ressourceNamespace + FBE.ressourceName,
-            key: input.attributes["data_index"].value
+            key: input.attributes["data_id"].value
           }
         };
-
       //fill map
       if (input.name == "predicate") {
-        map[input.attributes["data_index"].value].old.predicate = input.attributes["data_original"].value;
-        map[input.attributes["data_index"].value].new.predicate = input.value;
+        map[input.attributes["data_id"].value].old.predicate = input.attributes["data_original"].value;
+        map[input.attributes["data_id"].value].new.predicate = input.value;
       } else {
-        map[input.attributes["data_index"].value].old.object = input.attributes["data_original"].value;
-        map[input.attributes["data_index"].value].new.object = input.value;
+        map[input.attributes["data_id"].value].old.object = input.attributes["data_original"].value;
+        map[input.attributes["data_id"].value].new.object = input.value;
       }
     });
 
@@ -268,6 +287,7 @@ var FBE = {
       FBE.Deletions.push(map[key].old);
       FBE.Inserts.push(map[key].new);
     }
+    console.log(FBE.Deletions);
   },
 
   arrowFunctionsAvaiable: function() {
