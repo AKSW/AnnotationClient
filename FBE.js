@@ -139,7 +139,7 @@
       modal.find("hr:first").before(FBE_Factory.getListTemplate);
       modal.find("#feedbackEntryList").on("click", "button.feedbackEdit", FBE_Handler.activateEditMode);
       modal.find("#feedbackEntryList").on("click", "button.feedbackRemove", FBE_Handler.removeTriple);
-      //TODO get correct ressource namespace automatically
+      //get uncorrect ressource namespace
       FBE.ressourceName = $(document).find("title").text();
       FBE.ressourceNamespace = "http://de.wikipedia.org/wiki/";
       modal.find('.modal-title').text('Feedback on Ressource ' + FBE.ressourceName);
@@ -193,6 +193,12 @@
 
       var firstKey = Object.keys(data)[0];
       var triples = data[firstKey];
+
+      //update namespace and name
+      var namespaceParts = firstKey.split("/");
+      FBE.ressourceName = namespaceParts[namespaceParts.length-1];
+      FBE.ressourceNamespace = firstKey.substring(0, firstKey.length - FBE.ressourceName.length);
+      console.log(FBE.ressourceNamespace, FBE.ressourceName, FBE.ressourceNamespace + FBE.ressourceName)
 
       var listEntries = "";
       var counter = 1;
