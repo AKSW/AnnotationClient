@@ -333,36 +333,34 @@
         return;
 
       //fill Deletions and Inserts
-      //FIXME very annoying, because JS got Maps and this is not such a map. See https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Map
-
       var changes = {};
       filteredInputs.forEach(function(input) {
-        if (changes[input.attributes["data_id"].value] === undefined) {
-          changes[input.attributes["data_id"].value] = {
+        if (changes[input.attributes.data_id.value] === undefined) {
+          changes[input.attributes.data_id.value] = {
             old: {
               subject: FBE.ressourceNamespace + FBE.ressourceName,
-              key: input.attributes["data_id"].value,
+              key: input.attributes.data_id.value,
               saveThis: true
             },
             new: {
               subject: FBE.ressourceNamespace + FBE.ressourceName,
-              key: input.attributes["data_id"].value,
+              key: input.attributes.data_id.value,
               saveThis: true
             }
           };
         }
         if (input.name == "predicate") {
-          changes[input.attributes["data_id"].value].old.predicate = input.attributes["data_original"].value;
-          changes[input.attributes["data_id"].value].new.predicate = input.value;
+          changes[input.attributes.data_id.value].old.predicate = input.attributes.data_original.value;
+          changes[input.attributes.data_id.value].new.predicate = input.value;
         } else {
-          changes[input.attributes["data_id"].value].old.object = input.attributes["data_original"].value;
-          changes[input.attributes["data_id"].value].new.object = input.value;
+          changes[input.attributes.data_id.value].old.object = input.attributes.data_original.value;
+          changes[input.attributes.data_id.value].new.object = input.value;
         }
         if ($(input).hasClass("new")) {
-          changes[input.attributes["data_id"].value].old.saveThis = false;
+          changes[input.attributes.data_id.value].old.saveThis = false;
         }
         if ($(input).hasClass("remove")) {
-          changes[input.attributes["data_id"].value].new.saveThis = false;
+          changes[input.attributes.data_id.value].new.saveThis = false;
         }
       });
 
@@ -389,8 +387,9 @@
       var styles = '<link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">' +
         '<link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">';
       $('head').append(styles);
-      $.getScript("https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js")
-      $.getScript("http://point-at-infinity.org/jssha256/jssha256.js")
+      //TODO validate for success
+      $.getScript("https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js");
+      $.getScript("http://point-at-infinity.org/jssha256/jssha256.js");
       FBE.addFeedbackButton();
     }
   });
