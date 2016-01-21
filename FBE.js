@@ -138,10 +138,6 @@
       FBE.ressourceName = $(document).find("title").text();
       FBE.ressourceNamespace = "http://de.wikipedia.org/wiki/";
       $("#feedbackModal").find('.modal-title').text('Feedback on Ressource ' + FBE.ressourceName);
-      FBE.getPlainData();
-    },
-
-    getPlainData() {
       FBE.getTriples((false));
     },
 
@@ -168,30 +164,21 @@
 
       $.get(url + "output=application%2Frdf%2Bjson")
         .done(function(data, text, jqxhr) {
-          console.log(data);
           FBE.parseAndUseNewTriples(data, toInsert);
         })
         .fail(function(jqxhr, textStatus, error) {
           console.log(textStatus + " " + error);
-
-          //TODO have to be removed
-          FBE.getTriplesFromFile(toInsert);
         });
     },
 
     //function for debugging file requests
     getTriplesFromFile: function(toInsert) {
-      $.get("Leipzig.json")
+      $.get("Gegenteil.json")
         .done(function(data, text, jqxhr) {
           FBE.parseAndUseNewTriples(data, toInsert);
         })
         .fail(function(jqxhr, textStatus, error) {
           console.log(textStatus + " " + error);
-          //TODO has to be removed
-          //FBE.parseNewTriples(myn3___);
-          //TODO show error message
-          //TODO hide progress bar
-          //$("#feedbackModal_progressbar").hide();
         });
     },
 
@@ -206,7 +193,7 @@
       var namespaceParts = firstKey.split("/");
       FBE.ressourceName = namespaceParts[namespaceParts.length - 1];
       FBE.ressourceNamespace = firstKey.substring(0, firstKey.length - FBE.ressourceName.length);
-      console.log(FBE.ressourceNamespace, FBE.ressourceName, FBE.ressourceNamespace + FBE.ressourceName)
+      console.log("Namespace: " + FBE.ressourceNamespace + "\n Resource: " + FBE.ressourceName);
 
       var listEntries = "";
       var counter = 1;
