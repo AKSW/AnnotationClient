@@ -30,10 +30,10 @@
         '        <h4 class="modal-title">Modal Title</h4>' +
         '      </div>' +
         '      <div class="modal-body">' +
-        '        <div class="progress progress-striped active" id="feedbackModal_progressbar">' +
-        '         <div class="progress-bar" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width: 100%"></div>' +
-        '        </div>' +
-        '        <form id="feedbackEntryList" class="form-inline"></form>' +
+        '       <div>' +
+        '         <h4>Do you want to edit Resources on this Page?</h4><br>' +
+        '         <button type="button" id="feddbackEditResources" class="btn btn-info">Edit Resources</button>' +
+        '       </div>' +
         '        <hr>' +
         '        <form id="feedbackForm">' +
         '         <p class="help-block">Please leave us a comment and your identity.</p>' +
@@ -52,6 +52,13 @@
         '    </div>' +
         '  </div>' +
         '</div>';
+    },
+
+    getListTemplate: function() {
+      return '<div class="progress progress-striped active" id="feedbackModal_progressbar">' +
+        '<div class="progress-bar" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width: 100%"></div>' +
+        '</div>' +
+        '<form id="feedbackEntryList" class="form-inline"></form>';
     }
   };
 
@@ -64,6 +71,11 @@
         FBE.createFeedbackModal();
         FBE_Handler.openFeedbackModal();
       }
+    },
+
+    loadResources: function(event) {
+      event.preventDefault();
+      FBE.fillFeedbackModal();
     },
 
     sendFeedback: function(event) {
@@ -117,17 +129,20 @@
 
     createFeedbackModal: function() {
       $("body").append(FBE_Factory.getModal());
-      $("#feedbackEntryList").on("click", "button.feedbackEdit", FBE_Handler.activateEditMode);
-      $("#feedbackEntryList").on("click", "button.feedbackRemove", FBE_Handler.removeTriple);
+      $("#feddbackEditResources").click(FBE_Handler.loadResources);
       $("#feedbackForm").submit(FBE_Handler.sendFeedback);
-      FBE.fillFeedbackModal();
     },
 
     fillFeedbackModal: function() {
+      var modal = $("#feedbackModal");
+      modal.find("#feddbackEditResources").closest("div").remove();
+      modal.find("hr:first").before(FBE_Factory.getListTemplate);
+      modal.find("#feedbackEntryList").on("click", "button.feedbackEdit", FBE_Handler.activateEditMode);
+      modal.find("#feedbackEntryList").on("click", "button.feedbackRemove", FBE_Handler.removeTriple);
+      //TODO get correct ressource namespace automatically
       FBE.ressourceName = $(document).find("title").text();
-      //TODO get correct ressource namespace automaticallygit
       FBE.ressourceNamespace = "http://de.wikipedia.org/wiki/";
-      $("#feedbackModal").find('.modal-title').text('Feedback on Ressource ' + FBE.ressourceName);
+      modal.find('.modal-title').text('Feedback on Ressource ' + FBE.ressourceName);
       FBE.getTriples();
     },
 
@@ -158,7 +173,7 @@
 
     //function for debugging file requests
     getTriplesFromFile: function() {
-      $.get("Gegenteil.json")
+      $.get("Leipzig.json")
         .done(function(data, text, jqxhr) {
           FBE.parseAndUseNewTriples(data);
         })
@@ -200,10 +215,11 @@
         counter += Object.keys(value).length;
       }
 
-      $("#feedbackEntryList").append(listEntries);
-      $("#feedbackEntryList").append('<button class="btn btn-success feedbackAdd"><i class="fa fa-plus"></i> Add Element</button>');
-      $("#feedbackEntryList").find(".feedbackAdd").click(FBE_Handler.addTriple);
-      $("#feedbackModal_progressbar").hide();
+      var list = $("#feedbackEntryList");
+      list.append(listEntries); // FIXME around 155ms for Leipzig
+      list.append('<button class="btn btn-success feedbackAdd"><i class="fa fa-plus"></i> Add Element</button>');
+      list.find(".feedbackAdd").click(FBE_Handler.addTriple);
+      $("#feedbackModal_progressbar").remove();
     },
 
     createCommit: function() {
