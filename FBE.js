@@ -38,7 +38,7 @@
         '        <form id="feedbackForm">' +
         '         <p class="help-block">Please leave us a comment and your identity.</p>' +
         '         <div class="form-group">' +
-        '           <input id="feedbackFormAuthor" type="email" class="form-control" placeholder="Your e-mail address">' +
+        '           <input id="feedbackFormAuthor" type="text" class="form-control" placeholder="Your Homepage">' +
         '         </div>' +
         '         <div class="form-group">' +
         '         <textarea id="feedbackFormMessage" rows="2" form="feedbackForm" class="form-control" placeholder="Your message..."></textarea>' +
@@ -237,17 +237,14 @@
         '@prefix eccrev: <https://vocab.eccenca.com/revision/>.\n' +
         '@prefix prov: <http://www.w3.org/ns/prov#>.\n' +
         '@prefix xsd: <http://www.w3.org/2001/XMLSchema#>.\n' +
-        '@prefix rdfs: <http://www.w3.org/2001/XMLSchema#>.\n' +
-        '@prefix owl: <http://www.w3.org/2002/07/owl#>.\n' +
         '@prefix sioc: <http://rdfs.org/sioc/ns#>.\n' +
-        '{ ex:patch-' + patchRevision + ' a eccrev:Commit;\n' +
-        '    eccrev:commitAuthor <mailto:' + $("#feedbackFormAuthor").val() + '>;\n' +
+        '@prefix foaf: <http://xmlns.com/foaf/>.\n' +
+        '{ ex:patch-' + patchRevision + ' a eccrev:Commit, sioc:Item;\n' +
+        '    foaf:maker <' + FBE.checkForAngleBrackets($("#feedbackFormAuthor").val()) + '>;\n' +
         '    eccrev:commitMessage "' + $("#feedbackFormMessage").val() + '";\n' +
         '    prov:atTime "' + new Date().toISOString() + '"^^xsd:dateTime;\n' + //Format: 2015-12-17T13:37:00+01:00
         '    sioc:reply_of ' + FBE.checkForAngleBrackets(FBE.ressourceNamespace + FBE.ressourceName) + ';\n' +
         '    eccrev:sha256 "' + SHA256_hash(del + insert) + '"^^xsd:base64Binary.\n' +
-        '  eccrev:revision-' + revisionRevision + ' a eccrev:Revision;\n' +
-        '    sioc:reply_of ' + FBE.checkForAngleBrackets(FBE.ressourceNamespace + FBE.ressourceName) + ';\n' +
         '    eccrev:deltaDelete ex:delete-' + deleteRevision + ';\n' +
         '    eccrev:deltaInsert ex:insert-' + insertRevision + '\n' +
         '}\n';
@@ -399,14 +396,7 @@
   };
 
   $(document).ready(function() {
-    if (FBE.arrowFunctionsAvaiable()) {
-      var styles = '<link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">' +
-        '<link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">';
-      $('head').append(styles);
-      //TODO validate for success
-      $.getScript("https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js");
-      $.getScript("http://point-at-infinity.org/jssha256/jssha256.js");
+    if (FBE.arrowFunctionsAvaiable())
       FBE.addFeedbackButton();
-    }
   });
 }());
