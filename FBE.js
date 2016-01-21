@@ -396,7 +396,14 @@
   };
 
   $(document).ready(function() {
-    if (FBE.arrowFunctionsAvaiable())
+    if (FBE.arrowFunctionsAvaiable()) {
+      var styles = '<link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">' +
+        '<link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">';
+      $('head').append(styles);
+      //TODO validate for success
+      $.getScript("https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js");
+      $.getScript("http://point-at-infinity.org/jssha256/jssha256.js");
       FBE.addFeedbackButton();
+    }
   });
 }());
