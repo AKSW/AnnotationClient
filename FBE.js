@@ -80,7 +80,11 @@
 
     sendFeedback: function(event) {
       event.preventDefault();
-      FBE.createCommit();
+      FBE.updateChanges();
+      if (FBE.Deletions.length === 0 && FBE.Inserts.length === 0)
+        FBE.createComment();
+      else
+        FBE.createCommit();
     },
 
     activateEditMode: function(event) {
@@ -131,6 +135,14 @@
       $("body").append(FBE_Factory.getModal());
       $("#feddbackEditResources").click(FBE_Handler.loadResources);
       $("#feedbackForm").submit(FBE_Handler.sendFeedback);
+      FBE.ressourceName = $(document).find("title").text();
+      FBE.ressourceNamespace = "http://de.wikipedia.org/wiki/";
+      $("#feedbackModal").find('.modal-title').text('Feedback on Ressource ' + FBE.ressourceName);
+      FBE.getPlainData();
+    },
+
+    getPlainData() {
+      FBE.getTriples((false));
     },
 
     fillFeedbackModal: function() {
@@ -139,17 +151,13 @@
       modal.find("hr:first").before(FBE_Factory.getListTemplate);
       modal.find("#feedbackEntryList").on("click", "button.feedbackEdit", FBE_Handler.activateEditMode);
       modal.find("#feedbackEntryList").on("click", "button.feedbackRemove", FBE_Handler.removeTriple);
-      //get uncorrect ressource namespace
-      FBE.ressourceName = $(document).find("title").text();
-      FBE.ressourceNamespace = "http://de.wikipedia.org/wiki/";
-      modal.find('.modal-title').text('Feedback on Ressource ' + FBE.ressourceName);
-      FBE.getTriples();
+      FBE.getTriples(true);
     },
 
-    getTriples: function() {
+    getTriples: function(toInsert) {
       //debug
       if (location.toString().startsWith("file://") || location.toString().startsWith("http://kdi-student.de") || location.toString().startsWith("http://localhost")) {
-        FBE.getTriplesFromFile();
+        FBE.getTriplesFromFile(toInsert);
         return;
       }
 
@@ -161,21 +169,21 @@
       $.get(url + "output=application%2Frdf%2Bjson")
         .done(function(data, text, jqxhr) {
           console.log(data);
-          FBE.parseAndUseNewTriples(data);
+          FBE.parseAndUseNewTriples(data, toInsert);
         })
         .fail(function(jqxhr, textStatus, error) {
           console.log(textStatus + " " + error);
 
           //TODO have to be removed
-          FBE.getTriplesFromFile();
+          FBE.getTriplesFromFile(toInsert);
         });
     },
 
     //function for debugging file requests
-    getTriplesFromFile: function() {
+    getTriplesFromFile: function(toInsert) {
       $.get("Leipzig.json")
         .done(function(data, text, jqxhr) {
-          FBE.parseAndUseNewTriples(data);
+          FBE.parseAndUseNewTriples(data, toInsert);
         })
         .fail(function(jqxhr, textStatus, error) {
           console.log(textStatus + " " + error);
@@ -188,7 +196,7 @@
     },
 
     //use RDF JSON object from DBPedia to create HTML for the list
-    parseAndUseNewTriples: function(data) {
+    parseAndUseNewTriples: function(data, toInsert) {
       FBE.RDFJSONObject = data;
 
       var firstKey = Object.keys(data)[0];
@@ -196,7 +204,7 @@
 
       //update namespace and name
       var namespaceParts = firstKey.split("/");
-      FBE.ressourceName = namespaceParts[namespaceParts.length-1];
+      FBE.ressourceName = namespaceParts[namespaceParts.length - 1];
       FBE.ressourceNamespace = firstKey.substring(0, firstKey.length - FBE.ressourceName.length);
       console.log(FBE.ressourceNamespace, FBE.ressourceName, FBE.ressourceNamespace + FBE.ressourceName)
 
@@ -220,39 +228,52 @@
 
         counter += Object.keys(value).length;
       }
+      if (toInsert == true) {
+        var list = $("#feedbackEntryList");
+        list.append(listEntries); // FIXME around 155ms for Leipzig
+        list.append('<button class="btn btn-success feedbackAdd"><i class="fa fa-plus"></i> Add Element</button>');
+        list.find(".feedbackAdd").click(FBE_Handler.addTriple);
+        $("#feedbackModal_progressbar").remove();
+      }
+    },
 
-      var list = $("#feedbackEntryList");
-      list.append(listEntries); // FIXME around 155ms for Leipzig
-      list.append('<button class="btn btn-success feedbackAdd"><i class="fa fa-plus"></i> Add Element</button>');
-      list.find(".feedbackAdd").click(FBE_Handler.addTriple);
-      $("#feedbackModal_progressbar").remove();
+    createComment: function() {
+      var hash = SHA256_hash(new Date().toISOString());
+      var trig = '@prefix sioc: <http://rdfs.org/sioc/ns#>.\n' +
+        '@prefix sioct: <http://rdfs.org/sioc/types#>.\n' +
+        '@prefix foaf: <http://xmlns.com/foaf/>.\n' +
+        '@prefix prov: <http://www.w3.org/ns/prov#>.\n' +
+        '@prefix xsd: <http://www.w3.org/2001/XMLSchema#>.\n' +
+        'feedback:resource-' + hash + ' a sioc:Post, sioct:Comment ;\n' +
+        '   sioc:reply_of ' + FBE.checkForAngleBrackets(FBE.ressourceNamespace + FBE.ressourceName) + ' ;\n' +
+        '   foaf:maker ' + FBE.checkForAngleBrackets($("#feedbackFormAuthor").val()) + ' ;\n' +
+        '   sioc:content "' + $("#feedbackFormMessage").val() + '";\n' +
+        '   prov:atTime "' + new Date().toISOString() + '"^^xsd:dateTime ;\n';
+
+      FBE.sendFeedback(trig);
     },
 
     createCommit: function() {
-      FBE.updateChanges();
       //TODO Look for naming and hashing
       var hash = SHA256_hash(new Date().toISOString());
-      var insertRevision = hash,
-        deleteRevision = hash,
-        patchRevision = hash,
-        revisionRevision = hash;
 
-      var del = 'ex:delete-' + deleteRevision + FBE.getDeletes();
-      var insert = 'ex:insert-' + insertRevision + FBE.getInserts();
-      var trig = '@prefix ex: <http://example.org/feedback#>.\n' +
-        '@prefix eccrev: <https://vocab.eccenca.com/revision/>.\n' +
+      var del = 'feedback:delete-' + hash + FBE.getDeletes();
+      var insert = 'feedback:insert-' + hash + FBE.getInserts();
+      var trig = '@prefix eccrev: <https://vocab.eccenca.com/revision/>.\n' +
         '@prefix prov: <http://www.w3.org/ns/prov#>.\n' +
         '@prefix xsd: <http://www.w3.org/2001/XMLSchema#>.\n' +
         '@prefix sioc: <http://rdfs.org/sioc/ns#>.\n' +
         '@prefix foaf: <http://xmlns.com/foaf/>.\n' +
-        '{ ex:patch-' + patchRevision + ' a eccrev:Commit, sioc:Item;\n' +
-        '    foaf:maker <' + FBE.checkForAngleBrackets($("#feedbackFormAuthor").val()) + '>;\n' +
+        '{ feedback:patch-' + hash + ' a eccrev:Commit, sioc:Item;\n' +
+        '    foaf:maker ' + FBE.checkForAngleBrackets($("#feedbackFormAuthor").val()) + ';\n' +
         '    eccrev:commitMessage "' + $("#feedbackFormMessage").val() + '";\n' +
         '    prov:atTime "' + new Date().toISOString() + '"^^xsd:dateTime;\n' + //Format: 2015-12-17T13:37:00+01:00
         '    sioc:reply_of ' + FBE.checkForAngleBrackets(FBE.ressourceNamespace + FBE.ressourceName) + ';\n' +
-        '    eccrev:sha256 "' + SHA256_hash(del + insert) + '"^^xsd:base64Binary.\n' +
-        '    eccrev:deltaDelete ex:delete-' + deleteRevision + ';\n' +
-        '    eccrev:deltaInsert ex:insert-' + insertRevision + '\n' +
+        '    eccrev:sha256 "' + SHA256_hash(del + insert) + '"^^xsd:base64Binary;\n' +
+        '    eccrev:hasRevision feedback:revision-' + hash + ' .' +
+        '  feedback:revision-' + hash + ' a eccrev:Revision;\n' +
+        '    eccrev:deltaDelete feedback:delete-' + hash + ';\n' +
+        '    eccrev:deltaInsert feedback:insert-' + hash + '.\n' +
         '}\n';
 
       FBE.sendFeedback(trig + del + insert);
