@@ -38,10 +38,10 @@
         '        <form id="feedbackForm">' +
         '         <p class="help-block">Please leave us a comment and your identity.</p>' +
         '         <div class="form-group">' +
-        '           <input id="feedbackFormAuthor" type="text" class="form-control" placeholder="Your Homepage">' +
+        '           <input id="feedbackFormAuthor" type="url" class="form-control" placeholder="Your Homepage" required>' +
         '         </div>' +
         '         <div class="form-group">' +
-        '         <textarea id="feedbackFormMessage" rows="2" form="feedbackForm" class="form-control" placeholder="Your message..."></textarea>' +
+        '         <textarea id="feedbackFormMessage" rows="2" form="feedbackForm" class="form-control" placeholder="Your message..." required></textarea>' +
         '         </div>' +
         '        </form>' +
         '      </div>' +
