@@ -165,12 +165,21 @@
         return;
       }
 
-      //prepare url for GET
-      var url = location.toString();
-      if (url.substring(url.length - 1, url.length) !== "?")
-        url += "?";
+      //get URL of resource from metadata
+      var url = document.querySelector("link[rel='canonical']");
+      if (url === undefined || url === null || url === "") {
+        url = document.querySelector("link[rel='foaf:primarytopic']");
+        if (url === undefined || url === null || url === "") {
+          url = document.querySelector("link[rel='describedby']");
+        }
+      }
+      url = url.href;
 
-      $.get(url + "output=application%2Frdf%2Bjson")
+      $.ajax({
+           url: url,
+           type: "GET",
+           beforeSend: function(xhr){xhr.setRequestHeader('Accept', 'application/rdf+json');}
+        })
         .done(function(data, text, jqxhr) {
           FBE.parseAndUseNewTriples(data, toInsert);
         })
