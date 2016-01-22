@@ -397,15 +397,53 @@
     }
   };
 
-  $(document).ready(function() {
+  // Replacement for $(document).ready() because jquery might not be available
+  // Source: https://stackoverflow.com/questions/799981/document-ready-equivalent-without-jquery
+  document.addEventListener("DOMContentLoaded", function(event) {
     if (FBE.arrowFunctionsAvaiable()) {
-      var styles = '<link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">' +
-        '<link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">';
-      $('head').append(styles);
-      //TODO validate for success
-      $.getScript("https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js");
-      $.getScript("http://point-at-infinity.org/jssha256/jssha256.js");
-      FBE.addFeedbackButton();
+
+      var checkReady = function(callback) {
+        callback(jQuery);
+      }
+
+      if (typeof jQuery == 'undefined') {
+        // Load Query without jquery:
+        // http://stackoverflow.com/a/10113434/414075
+        console.log("Load JQuery …");
+        // Load the script
+        var script = document.createElement("script");
+        script.src = 'https://ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js';
+        script.type = 'text/javascript';
+        document.getElementsByTagName("head")[0].appendChild(script);
+
+        // Poll for jQuery to come into existance
+        var checkReady = function(callback) {
+          if (window.jQuery) {
+            console.log("Loading JQuery … done");
+            callback(jQuery);
+          }
+          else {
+            window.setTimeout(function() { checkReady(callback); }, 100);
+          }
+        };
+      }
+
+      // Start polling...
+      checkReady(function($) {
+        // Use $ here...
+        var styles = '<link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">' +
+          '<link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">';
+        $('head').append(styles);
+        console.log("Add Style … done");
+        //TODO validate for success
+        $.getScript("https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js");
+        console.log("Add Bootstrap … done");
+        $.getScript("http://point-at-infinity.org/jssha256/jssha256.js");
+        console.log("Add JSSHA256 … done");
+        FBE.addFeedbackButton();
+        console.log("Add Feedback Button … done");
+      });
+
     } else {
       console.log("Hey there... seems that your're using a very old browser or at least a browser that isn't supporting features that we need. I'm sorry, but we disabled the feedback feature. Please use another browser!");
     }
