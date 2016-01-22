@@ -81,10 +81,17 @@
     sendFeedback: function(event) {
       event.preventDefault();
       FBE.updateChanges();
-      if (FBE.Deletions.length === 0 && FBE.Inserts.length === 0)
-        FBE.createComment();
-      else
-        FBE.createCommit();
+      var hash = SHA256_hash(new Date().toISOString());
+      $.get(FBE.URL_RHS)
+        .done(function(data, text, jqxhr) {
+          hash = data.hash;
+        })
+        .always(function() {
+          if (FBE.Deletions.length === 0 && FBE.Inserts.length === 0)
+            FBE.createComment(hash);
+          else
+            FBE.createCommit(hash);
+        });
     },
 
     activateEditMode: function(event) {
@@ -224,9 +231,7 @@
       }
     },
 
-    createComment: function() {
-      var hash = SHA256_hash(new Date().toISOString());
-      //TODO correct subject namespace
+    createComment: function(hash) {
       var subject = '<feedback:resource-' + hash + '>';
       var nquads = subject + ' <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://rdfs.org/sioc/ns#Post>.\n' +
         subject + ' <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://rdfs.org/sioc/types#Comment>.\n' +
@@ -238,9 +243,7 @@
       FBE.sendFeedback(nquads);
     },
 
-    createCommit: function() {
-      //TODO Look for naming and hashing
-      var hash = SHA256_hash(new Date().toISOString());
+    createCommit: function(hash) {
       var subject = '<feedback:patch-' + hash + '>';
       var revision = '<feedback:revision-' + hash + '>';
       var delGraph = '<feedback:delete-' + hash + '>';
@@ -290,33 +293,20 @@
     },
 
     //publish the new ressource like descripted in the paper of Natanael
-    sendFeedback: function(trig) {
-      console.log(trig);
+    sendFeedback: function(tosend) {
+      console.log(tosend);
 
-      //get identifier from ressource hosting service
-      $.get(FBE.URL_RHS)
+      $.ajax({
+          url: FBE.available_URI,
+          method: "PUT",
+          data: tosend,
+          dataType: "application/n-quads",
+          cache: false
+        })
         .done(function(data, text, jqxhr) {
-          //console.log(data);
+          console.log(data);
 
-          //save URI
-          FBE.available_URI = data.availableURI;
-
-          //use new URI for saving ressource
-          $.ajax({
-              url: FBE.available_URI,
-              method: "PUT",
-              data: trig,
-              dataType: "n3",
-              cache: false
-            })
-            .done(function(data, text, jqxhr) {
-              console.log(data);
-
-              FBE.pingSemanticPingbackEndpoint();
-            })
-            .fail(function(jqxhr, textStatus, error) {
-              console.log(textStatus + " " + error);
-            });
+          FBE.pingSemanticPingbackEndpoint();
         })
         .fail(function(jqxhr, textStatus, error) {
           console.log(textStatus + " " + error);
@@ -324,11 +314,11 @@
 
       // TODO Post to Resource Hosting Service
       /*
-      $.post(url, trig, null, "application/trig")
+      $.post(url, tosend, null, "application/n-quads")
         .done(function() {})
         .fail(function() {});
       // TODO Post to Pingback
-      $.post(url, {}, null, "application/trig")
+      $.post(url, {}, null, "application/n-quads")
         .done(function() {})
         .fail(function() {});
       */
