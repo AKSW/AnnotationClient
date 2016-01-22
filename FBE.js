@@ -129,7 +129,7 @@
     Inserts: [],
     RessourceTuples: [],
     RDFJSONObject: "",
-    URL_RHS: "",
+    URL_RHS: "http://jsndfisdf.org",
     available_URI: "",
     URL_SPE: "",
 
@@ -222,7 +222,7 @@
 
         counter += Object.keys(value).length;
       }
-      if (toInsert == true) {
+      if (toInsert === true) {
         var list = $("#feedbackEntryList");
         list.append(listEntries); // FIXME around 155ms for Leipzig
         list.append('<button class="btn btn-success feedbackAdd"><i class="fa fa-plus"></i> Add Element</button>');
