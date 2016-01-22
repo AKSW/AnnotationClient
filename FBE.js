@@ -226,64 +226,60 @@
 
     createComment: function() {
       var hash = SHA256_hash(new Date().toISOString());
-      var trig = '@prefix sioc: <http://rdfs.org/sioc/ns#>.\n' +
-        '@prefix sioct: <http://rdfs.org/sioc/types#>.\n' +
-        '@prefix foaf: <http://xmlns.com/foaf/>.\n' +
-        '@prefix prov: <http://www.w3.org/ns/prov#>.\n' +
-        '@prefix xsd: <http://www.w3.org/2001/XMLSchema#>.\n' +
-        'feedback:resource-' + hash + ' a sioc:Post, sioct:Comment ;\n' +
-        '   sioc:reply_of ' + FBE.checkForAngleBrackets(FBE.ressourceNamespace + FBE.ressourceName) + ' ;\n' +
-        '   foaf:maker ' + FBE.checkForAngleBrackets($("#feedbackFormAuthor").val()) + ' ;\n' +
-        '   sioc:content "' + $("#feedbackFormMessage").val() + '";\n' +
-        '   prov:atTime "' + new Date().toISOString() + '"^^xsd:dateTime ;\n';
+      //TODO correct subject namespace
+      var subject = '<feedback:resource-' + hash + '>';
+      var nquads = subject + ' <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://rdfs.org/sioc/ns#Post>.\n' +
+        subject + ' <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://rdfs.org/sioc/types#Comment>.\n' +
+        subject + ' <http://rdfs.org/sioc/ns#reply_of> <' + FBE.ressourceNamespace + FBE.ressourceName + '>.\n' +
+        subject + ' <http://xmlns.com/foaf/maker> <' + $("#feedbackFormAuthor").val() + '>.\n' +
+        subject + ' <http://rdfs.org/sioc/ns#content> "' + $("#feedbackFormMessage").val() + '".\n' +
+        subject + ' <http://www.w3.org/ns/prov#atTime> "' + new Date().toISOString() + '"^^<http://www.w3.org/2001/XMLSchema#dateTime>.\n';
 
-      FBE.sendFeedback(trig);
+      FBE.sendFeedback(nquads);
     },
 
     createCommit: function() {
       //TODO Look for naming and hashing
       var hash = SHA256_hash(new Date().toISOString());
+      var subject = '<feedback:patch-' + hash + '>';
+      var revision = '<feedback:revision-' + hash + '>';
+      var delGraph = '<feedback:delete-' + hash + '>';
+      var insGraph = '<feedback:insert-' + hash + '>';
 
-      var del = 'feedback:delete-' + hash + FBE.getDeletes();
-      var insert = 'feedback:insert-' + hash + FBE.getInserts();
-      var trig = '@prefix eccrev: <https://vocab.eccenca.com/revision/>.\n' +
-        '@prefix prov: <http://www.w3.org/ns/prov#>.\n' +
-        '@prefix xsd: <http://www.w3.org/2001/XMLSchema#>.\n' +
-        '@prefix sioc: <http://rdfs.org/sioc/ns#>.\n' +
-        '@prefix foaf: <http://xmlns.com/foaf/>.\n' +
-        '{ feedback:patch-' + hash + ' a eccrev:Commit, sioc:Item;\n' +
-        '    foaf:maker ' + FBE.checkForAngleBrackets($("#feedbackFormAuthor").val()) + ';\n' +
-        '    eccrev:commitMessage "' + $("#feedbackFormMessage").val() + '";\n' +
-        '    prov:atTime "' + new Date().toISOString() + '"^^xsd:dateTime;\n' + //Format: 2015-12-17T13:37:00+01:00
-        '    sioc:reply_of ' + FBE.checkForAngleBrackets(FBE.ressourceNamespace + FBE.ressourceName) + ';\n' +
-        '    eccrev:sha256 "' + SHA256_hash(del + insert) + '"^^xsd:base64Binary;\n' +
-        '    eccrev:hasRevision feedback:revision-' + hash + ' .' +
-        '  feedback:revision-' + hash + ' a eccrev:Revision;\n' +
-        '    eccrev:deltaDelete feedback:delete-' + hash + ';\n' +
-        '    eccrev:deltaInsert feedback:insert-' + hash + '.\n' +
-        '}\n';
+      var deletes = FBE.getDeletes(delGraph);
+      var inserts = FBE.getInserts(insGraph);
+      var nquads = subject + ' <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://vocab.eccenca.com/revision/Commit>.\n' +
+        subject + ' <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://rdfs.org/sioc/ns#Item>.\n' +
+        subject + ' <http://xmlns.com/foaf/maker> <' + $("#feedbackFormAuthor").val() + '>.\n' +
+        subject + ' <https://vocab.eccenca.com/revision/commitMessage> "' + $("#feedbackFormMessage").val() + '".\n' +
+        subject + ' <http://www.w3.org/ns/prov#atTime> "' + new Date().toISOString() + '"^^<http://www.w3.org/2001/XMLSchema#dateTime>.\n' +
+        subject + ' <http://rdfs.org/sioc/ns#reply_of> <' + FBE.ressourceNamespace + FBE.ressourceName + '>.\n' +
+        subject + ' <https://vocab.eccenca.com/revision/hasRevision> ' + revision + '.\n' +
+        revision + ' <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://vocab.eccenca.com/revision/Revision>.\n' +
+        revision + ' <https://vocab.eccenca.com/revision/deltaDelete> ' + delGraph + '.\n' +
+        revision + ' <https://vocab.eccenca.com/revision/deltaInsert> ' + insGraph + '.\n';
 
-      FBE.sendFeedback(trig + del + insert);
+      FBE.sendFeedback(nquads + deletes + inserts);
     },
 
-    getInserts: function() {
+    getInserts: function(graph) {
       var inserts = "";
       if (FBE.Inserts.length !== 0) {
         inserts = FBE.Inserts
-          .map(obj => FBE.checkForAngleBrackets(obj.subject) + ' ' + FBE.checkForAngleBrackets(obj.predicate) + ' ' + FBE.checkForAngleBrackets(obj.object) + '.\n')
-          .reduce((prev, curr, _) => prev + curr).slice(0, -2);
+          .map(obj => FBE.checkForAngleBrackets(obj.subject) + ' ' + FBE.checkForAngleBrackets(obj.predicate) + ' ' + FBE.checkForAngleBrackets(obj.object) + ' ' + graph + '.\n')
+          .reduce((prev, curr, _) => prev + curr);
       }
-      return (' { ' + inserts + ' }');
+      return inserts;
     },
 
-    getDeletes: function() {
+    getDeletes: function(graph) {
       var deletions = "";
       if (FBE.Deletions.length !== 0) {
         deletions = FBE.Deletions
-          .map(obj => FBE.checkForAngleBrackets(obj.subject) + ' ' + FBE.checkForAngleBrackets(obj.predicate) + ' ' + FBE.checkForAngleBrackets(obj.object) + '.\n')
-          .reduce((prev, curr, _) => prev + curr).slice(0, -2);
+          .map(obj => FBE.checkForAngleBrackets(obj.subject) + ' ' + FBE.checkForAngleBrackets(obj.predicate) + ' ' + FBE.checkForAngleBrackets(obj.object) + ' ' + graph + '.\n')
+          .reduce((prev, curr, _) => prev + curr);
       }
-      return ('{ ' + deletions + ' }\n');
+      return deletions;
     },
 
     checkForAngleBrackets: function(str) {
