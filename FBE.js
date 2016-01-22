@@ -82,9 +82,10 @@
       event.preventDefault();
       FBE.updateChanges();
       var hash = SHA256_hash(new Date().toISOString());
-      $.get(FBE.URL_RHS)
+      $.get(FBE.URL_RHS + "nextresource")
         .done(function(data, text, jqxhr) {
-          hash = data.hash;
+          hash = data.nexthash;
+          console.log(hash);
         })
         .always(function() {
           if (FBE.Deletions.length === 0 && FBE.Inserts.length === 0)
@@ -129,8 +130,8 @@
     Inserts: [],
     RessourceTuples: [],
     RDFJSONObject: "",
-    URL_RHS: "http://jsndfisdf.org",
-    available_URI: "",
+    URL_RHS: "http://localhost:8080/",
+    available_URI: "http://localhost:8080/",
     URL_SPE: "",
 
     addFeedbackButton: function() {
@@ -232,7 +233,7 @@
     },
 
     createComment: function(hash) {
-      var subject = '<feedback:resource-' + hash + '>';
+      var subject = '<http://localhost:8080/resource-' + hash + '>';
       var nquads = subject + ' <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://rdfs.org/sioc/ns#Post>.\n' +
         subject + ' <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://rdfs.org/sioc/types#Comment>.\n' +
         subject + ' <http://rdfs.org/sioc/ns#reply_of> <' + FBE.ressourceNamespace + FBE.ressourceName + '>.\n' +
@@ -240,14 +241,14 @@
         subject + ' <http://rdfs.org/sioc/ns#content> "' + $("#feedbackFormMessage").val() + '".\n' +
         subject + ' <http://www.w3.org/ns/prov#atTime> "' + new Date().toISOString() + '"^^<http://www.w3.org/2001/XMLSchema#dateTime>.\n';
 
-      FBE.sendFeedback(nquads);
+      FBE.sendFeedback(nquads, hash);
     },
 
     createCommit: function(hash) {
-      var subject = '<feedback:patch-' + hash + '>';
-      var revision = '<feedback:revision-' + hash + '>';
-      var delGraph = '<feedback:delete-' + hash + '>';
-      var insGraph = '<feedback:insert-' + hash + '>';
+      var subject = '<http://localhost:8080/patch-' + hash + '>';
+      var revision = '<http://localhost:8080/revision-' + hash + '>';
+      var delGraph = '<http://localhost:8080/delete-' + hash + '>';
+      var insGraph = '<http://localhost:8080/insert-' + hash + '>';
 
       var deletes = FBE.getDeletes(delGraph);
       var inserts = FBE.getInserts(insGraph);
@@ -262,7 +263,7 @@
         revision + ' <https://vocab.eccenca.com/revision/deltaDelete> ' + delGraph + '.\n' +
         revision + ' <https://vocab.eccenca.com/revision/deltaInsert> ' + insGraph + '.\n';
 
-      FBE.sendFeedback(nquads + deletes + inserts);
+      FBE.sendFeedback(nquads + deletes + inserts, hash);
     },
 
     getInserts: function(graph) {
@@ -293,23 +294,24 @@
     },
 
     //publish the new ressource like descripted in the paper of Natanael
-    sendFeedback: function(tosend) {
+    sendFeedback: function(tosend, hash) {
       console.log(tosend);
 
       $.ajax({
-          url: FBE.available_URI,
+          url: FBE.available_URI + hash,
           method: "PUT",
           data: tosend,
-          dataType: "application/n-quads",
+          dataType: "nquads",
           cache: false
         })
         .done(function(data, text, jqxhr) {
           console.log(data);
 
-          FBE.pingSemanticPingbackEndpoint();
+          //FBE.pingSemanticPingbackEndpoint();
         })
         .fail(function(jqxhr, textStatus, error) {
           console.log(textStatus + " " + error);
+          console.log(jqxhr);
         });
 
       // TODO Post to Resource Hosting Service
