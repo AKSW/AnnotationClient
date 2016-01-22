@@ -404,6 +404,8 @@
       $.getScript("https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js");
       $.getScript("http://point-at-infinity.org/jssha256/jssha256.js");
       FBE.addFeedbackButton();
+    } else {
+      console.log("Hey there... seems that your're using a very old browser or at least a browser that isn't supporting features that we need. I'm sorry, but we disabled the feedback feature. Please use another browser!");
     }
   });
 }());
