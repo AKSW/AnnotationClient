@@ -181,7 +181,7 @@
            beforeSend: function(xhr){xhr.setRequestHeader('Accept', 'application/rdf+json');}
         })
         .done(function(data, text, jqxhr) {
-          FBE.parseAndUseNewTriples(data, toInsert);
+          FBE.parseAndUseNewTriples(data, toInsert, url);
         })
         .fail(function(jqxhr, textStatus, error) {
           console.log(textStatus + " " + error);
@@ -192,7 +192,8 @@
     getTriplesFromFile: function(toInsert) {
       $.get("Gegenteil.json")
         .done(function(data, text, jqxhr) {
-          FBE.parseAndUseNewTriples(data, toInsert);
+          var url = "http://de.dbpedia.org/resource/Gegenteil";
+          FBE.parseAndUseNewTriples(data, toInsert, url);
         })
         .fail(function(jqxhr, textStatus, error) {
           console.log(textStatus + " " + error);
@@ -200,10 +201,10 @@
     },
 
     //use RDF JSON object from DBPedia to create HTML for the list
-    parseAndUseNewTriples: function(data, toInsert) {
+    parseAndUseNewTriples: function(data, toInsert, firstKey) {
       FBE.RDFJSONObject = data;
 
-      var firstKey = Object.keys(data)[0];
+      //var firstKey = Object.keys(data)[0];
       var triples = data[firstKey];
 
       //update namespace and name
