@@ -131,7 +131,7 @@
     URL_SPE: "", //SPE ^= Semantic Pingback Endpoint
 
     addFeedbackButton: function() {
-      $("body").append('<button id="feedbackButton" type="button" class="btn btn-primary">Give Feedback</button>');
+      $("body").append('<button id="feedbackButton" type="button" class="">Give Feedback</button>');
       $("#feedbackButton").click(FBE_Handler.openFeedbackModal);
     },
 
@@ -438,6 +438,7 @@
     $('head').append(styles);
     $.getScript("https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js");
     $.getScript("http://point-at-infinity.org/jssha256/jssha256.js");
+    $('head').after('<style> #feedbackButton { position: absolute; bottom: 30px; right: 30px; z-index: 1; width: 70px; height: 70px; font-size: 1em; color: #fff; background: #2C98DE; border: none; border-radius: 50%; box-shadow: 0 3px 6px rgba(0,0,0,.275); outline: none; margin: auto;}</style>');
     FBE.addFeedbackButton();
   }
 }());
