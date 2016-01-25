@@ -218,12 +218,26 @@
 
         listEntries = value.map((element, i) => {
             var obj = element.value;
-            if (element.datatype !== undefined && element.datatype !== null)
-              obj = '&quot;' + element.value + '&quot;^^<' + element.datatype + ">";
+
+            switch (element.type)
+            {
+              case "uri":
+                obj = FBE.checkForAngleBrackets(obj);
+                break;
+
+              case "literal":
+                obj = "&quot;" + obj + "&quot;";
+
+                if (element.datatype)
+                  obj = obj + '^^' + FBE.checkForAngleBrackets(element.datatype);
+                else if (element.lang)
+                  obj = obj + "@" + element.lang;
+                break;
+            }
 
             return FBE_Factory.listEntry(i + counter,
               firstKey,
-              key,
+              FBE.checkForAngleBrackets(key),
               obj) + "<br>";
           })
           .reduce((prev, curr) => prev + curr, listEntries);
@@ -277,7 +291,7 @@
       var inserts = "";
       if (FBE.Inserts.length !== 0) {
         inserts = FBE.Inserts
-          .map(obj => FBE.checkForAngleBrackets(obj.subject) + ' ' + FBE.checkForAngleBrackets(obj.predicate) + ' ' + FBE.checkForAngleBrackets(obj.object) + ' ' + graph + '.\n')
+          .map(obj => FBE.checkForAngleBrackets(obj.subject) + ' ' + obj.predicate + ' ' + obj.object + ' ' + graph + '.\n')
           .reduce((prev, curr, _) => prev + curr);
       }
       return inserts;
@@ -287,7 +301,7 @@
       var deletions = "";
       if (FBE.Deletions.length !== 0) {
         deletions = FBE.Deletions
-          .map(obj => FBE.checkForAngleBrackets(obj.subject) + ' ' + FBE.checkForAngleBrackets(obj.predicate) + ' ' + FBE.checkForAngleBrackets(obj.object) + ' ' + graph + '.\n')
+          .map(obj => FBE.checkForAngleBrackets(obj.subject) + ' ' + obj.predicate + ' ' + obj.object + ' ' + graph + '.\n')
           .reduce((prev, curr, _) => prev + curr);
       }
       return deletions;
@@ -322,6 +336,12 @@
         });
     },
 
+    //call the SemanticPingback Service
+    /* example of a resource:
+    dbpedia:Leipzig
+      pingback:to <http://pingback.feedback.aksw.org/> ;
+      sioc:feed fb-feed:dbpedia-Leipzig .
+    */
     pingSemanticPingbackEndpoint: function() {
       $.get(FBE.URL_SPE)
         .done(function(data, text, jqxhr) {
