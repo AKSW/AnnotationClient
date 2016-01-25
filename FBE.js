@@ -123,13 +123,11 @@
 
   var FBE = {
 
-    ressourceNamespace: "",
-    ressourceName: "",
-    //Arrays with objects: {subject, predicate, object, key}
-    Deletions: [],
-    Inserts: [],
-    RessourceTuples: [],
-    URL_RHS: "http://localhost:8080/", // RHS ^= Resource Hosting Service
+    ressourceNamespace: "", //like "http://dbpedia.org/resource/""
+    ressourceName: "", //like "Taucha"
+    Deletions: [], //Array like : [{subject, predicate, object, key}]
+    Inserts: [], //Array like : [{subject, predicate, object, key}]
+    URL_RHS: "", // RHS ^= Resource Hosting Service
     URL_SPE: "", //SPE ^= Semantic Pingback Endpoint
 
     addFeedbackButton: function() {
@@ -141,9 +139,7 @@
       $("body").append(FBE_Factory.getModal());
       $("#feddbackEditResources").click(FBE_Handler.loadResources);
       $("#feedbackForm").submit(FBE_Handler.sendFeedback);
-      FBE.ressourceName = $(document).find("title").text();
-      FBE.ressourceNamespace = "http://de.wikipedia.org/wiki/";
-      $("#feedbackModal").find('.modal-title').text('Feedback on Ressource ' + FBE.ressourceName);
+      FBE.getServiceURLs();
       FBE.getTriples((false));
     },
 
@@ -156,6 +152,17 @@
       FBE.getTriples(true);
     },
 
+    getServiceURLs: function() {
+      FBE.URL_RHS = $('link[rel="resourcehostingservice"]').attr('href');
+      if (FBE.isEmpty(FBE.URL_RHS)) {
+        //TODO route to default RHS
+      }
+      FBE.URL_SPE = $('link[rel="pingbackservice"]').attr('href');
+      if (FBE.isEmpty(FBE.URL_SPE)) {
+        //TODO route to default SPE
+      }
+    },
+
     getTriples: function(toInsert) {
       var jsonURL = FBE.extractJsonUrl();
       var resourceURL = FBE.extractResourceUrl();
@@ -164,7 +171,6 @@
         jsonURL = "Taucha.json";
         //resourceURL = "http://de.dbpedia.org/resource/Taucha";
       }
-      console.log("JSON: " + jsonURL + "\nResource: " + resourceURL);
 
       $.get(jsonURL)
         .done(function(data, text, jqxhr) {
@@ -201,6 +207,8 @@
       FBE.ressourceName = namespaceParts[namespaceParts.length - 1];
       FBE.ressourceNamespace = firstKey.substring(0, firstKey.length - FBE.ressourceName.length);
       console.log("Namespace: " + FBE.ressourceNamespace + "\n Resource: " + FBE.ressourceName);
+      if (toInsert === false) //little hack to insert the modal title
+        $("#feedbackModal").find('.modal-title').text('Feedback on Ressource ' + FBE.ressourceName);
 
       var listEntries = "";
       var counter = 1;
