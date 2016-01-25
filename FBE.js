@@ -208,7 +208,7 @@
       FBE.ressourceNamespace = firstKey.substring(0, firstKey.length - FBE.ressourceName.length);
       console.log("Namespace: " + FBE.ressourceNamespace + "\n Resource: " + FBE.ressourceName);
       if (toInsert === false) //little hack to insert the modal title
-        $("#feedbackModal").find('.modal-title').text('Feedback on Ressource ' + FBE.ressourceName);
+        $("#feedbackModal").find('.modal-title').text('Feedback on Ressource ' + decodeURIComponent(FBE.ressourceName));
 
       var listEntries = "";
       var counter = 1;
@@ -262,7 +262,7 @@
       var nquads = subject + ' <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://vocab.eccenca.com/revision/Commit>.\n' +
         subject + ' <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://rdfs.org/sioc/ns#Item>.\n' +
         subject + ' <http://xmlns.com/foaf/maker> <' + $("#feedbackFormAuthor").val() + '>.\n' +
-        subject + ' <https://vocab.eccenca.com/revision/commitMessage> "' + $("#feedbackFormMessage").val() + '".\n' +
+        subject + ' <https://vocab.eccenca.com/revision/commitMessage> """' + $("#feedbackFormMessage").val() + '""".\n' +
         subject + ' <http://www.w3.org/ns/prov#atTime> "' + new Date().toISOString() + '"^^<http://www.w3.org/2001/XMLSchema#dateTime>.\n' +
         subject + ' <http://rdfs.org/sioc/ns#reply_of> <' + FBE.ressourceNamespace + FBE.ressourceName + '>.\n' +
         subject + ' <https://vocab.eccenca.com/revision/hasRevision> ' + revision + '.\n' +
