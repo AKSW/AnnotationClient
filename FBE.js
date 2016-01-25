@@ -129,10 +129,8 @@
     Deletions: [],
     Inserts: [],
     RessourceTuples: [],
-    RDFJSONObject: "",
-    URL_RHS: "http://localhost:8080/",
-    available_URI: "http://localhost:8080/",
-    URL_SPE: "",
+    URL_RHS: "http://localhost:8080/", // RHS ^= Resource Hosting Service
+    URL_SPE: "", //SPE ^= Semantic Pingback Endpoint
 
     addFeedbackButton: function() {
       $("body").append('<button id="feedbackButton" type="button" class="btn btn-primary" style="left: 10px; bottom: 10px; position: fixed;">Give Feedback</button>');
@@ -164,8 +162,7 @@
       //Test Environment Workaround
       if (location.toString().startsWith("file://") || location.toString().startsWith("http://kdi-student.de") || location.toString().startsWith("http://localhost")) {
         jsonURL = "Leipzig.json";
-        resourceURL = "http://de.dbpedia.org/resource/Leipzig"
-
+        resourceURL = "http://de.dbpedia.org/resource/Leipzig";
       }
       console.log("JSON: " + jsonURL + "\nResource: " + resourceURL);
 
@@ -197,7 +194,6 @@
 
     //use RDF JSON object from DBPedia to create HTML for the list
     parseAndUseNewTriples: function(data, toInsert, firstKey) {
-      FBE.RDFJSONObject = data;
 
       //var firstKey = Object.keys(data)[0];
       var triples = data[firstKey];
@@ -303,36 +299,25 @@
       console.log(tosend);
 
       $.ajax({
-          url: FBE.available_URI + hash,
-          method: "PUT",
+          url: FBE.URL_RHS + hash,
+          method: "POST",
           data: tosend,
-          dataType: "nquads",
+          contentType: "application/n-quads",
           cache: false
         })
         .done(function(data, text, jqxhr) {
+          console.log("Pushed the following to Norms RHS");
           console.log(data);
-
           //FBE.pingSemanticPingbackEndpoint();
         })
         .fail(function(jqxhr, textStatus, error) {
           console.log(textStatus + " " + error);
           console.log(jqxhr);
         });
-
-      // TODO Post to Resource Hosting Service
-      /*
-      $.post(url, tosend, null, "application/n-quads")
-        .done(function() {})
-        .fail(function() {});
-      // TODO Post to Pingback
-      $.post(url, {}, null, "application/n-quads")
-        .done(function() {})
-        .fail(function() {});
-      */
     },
 
     pingSemanticPingbackEndpoint: function() {
-      $.get(FBE.URL_SPE + FBE.available_URI)
+      $.get(FBE.URL_SPE)
         .done(function(data, text, jqxhr) {
           console.log(data);
         })
