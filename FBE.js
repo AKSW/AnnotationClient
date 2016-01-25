@@ -161,15 +161,13 @@
       var resourceURL = FBE.extractResourceUrl();
       //Test Environment Workaround
       if (location.toString().startsWith("file://") || location.toString().startsWith("http://kdi-student.de") || location.toString().startsWith("http://localhost")) {
-        jsonURL = "Leipzig.json";
-        resourceURL = "http://de.dbpedia.org/resource/Leipzig";
+        jsonURL = "Taucha.json";
+        //resourceURL = "http://de.dbpedia.org/resource/Taucha";
       }
       console.log("JSON: " + jsonURL + "\nResource: " + resourceURL);
 
       $.get(jsonURL)
         .done(function(data, text, jqxhr) {
-          console.log(data);
-          console.log(toInsert);
           FBE.parseAndUseNewTriples(data, toInsert, resourceURL);
         })
         .fail(function(jqxhr, textStatus, error) {
