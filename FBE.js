@@ -131,7 +131,7 @@
     URL_SPE: "", //SPE ^= Semantic Pingback Endpoint
 
     addFeedbackButton: function() {
-      $("body").append('<button id="feedbackButton" type="button" class="btn btn-primary" style="left: 10px; bottom: 10px; position: fixed;">Give Feedback</button>');
+      $("body").append('<button id="feedbackButton" type="button" class="btn btn-primary">Give Feedback</button>');
       $("#feedbackButton").click(FBE_Handler.openFeedbackModal);
     },
 
