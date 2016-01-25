@@ -159,45 +159,40 @@
     },
 
     getTriples: function(toInsert) {
-      //debug
+      var jsonURL = FBE.extractJsonUrl();
+      var resourceURL = FBE.extractResourceUrl();
+      //Test Environment Workaround
       if (location.toString().startsWith("file://") || location.toString().startsWith("http://kdi-student.de") || location.toString().startsWith("http://localhost")) {
-        FBE.getTriplesFromFile(toInsert);
-        return;
-      }
+        jsonURL = "Leipzig.json";
+        resourceURL = "http://de.dbpedia.org/resource/Leipzig"
 
-      //get URL of resource from metadata
-      var url = document.querySelector("link[rel='canonical']");
-      if (url === undefined || url === null || url === "") {
-        url = document.querySelector("link[rel='foaf:primarytopic']");
-        if (url === undefined || url === null || url === "") {
-          url = document.querySelector("link[rel='describedby']");
-        }
       }
-      url = url.href;
+      console.log("JSON: " + jsonURL + "\nResource: " + resourceURL);
 
-      $.ajax({
-           url: url,
-           type: "GET",
-           beforeSend: function(xhr){xhr.setRequestHeader('Accept', 'application/rdf+json');}
-        })
+      $.get(jsonURL)
         .done(function(data, text, jqxhr) {
-          FBE.parseAndUseNewTriples(data, toInsert, url);
+          console.log(data);
+          console.log(toInsert);
+          FBE.parseAndUseNewTriples(data, toInsert, resourceURL);
         })
         .fail(function(jqxhr, textStatus, error) {
           console.log(textStatus + " " + error);
         });
     },
 
-    //function for debugging file requests
-    getTriplesFromFile: function(toInsert) {
-      $.get("Gegenteil.json")
-        .done(function(data, text, jqxhr) {
-          var url = "http://de.dbpedia.org/resource/Gegenteil";
-          FBE.parseAndUseNewTriples(data, toInsert, url);
-        })
-        .fail(function(jqxhr, textStatus, error) {
-          console.log(textStatus + " " + error);
-        });
+    extractJsonUrl: function() {
+      var url = $('link[rel="alternate"][type="application/json"]').attr('href');
+      if (FBE.isEmpty(url)) { //TODO No json data available
+      }
+      return url;
+    },
+
+    extractResourceUrl: function() {
+      var url = $('link[rel="foaf:primarytopic"]').attr('href');
+      if (FBE.isEmpty(url)) {
+        url = $('link[rev="describedby"]').attr('href');
+      }
+      return url;
     },
 
     //use RDF JSON object from DBPedia to create HTML for the list
@@ -396,6 +391,14 @@
       }
     },
 
+    isEmpty: function(val) {
+      return (val === "" ||
+        val === {} ||
+        val === null ||
+        val === undefined ||
+        (val instanceof Array && val.length === 0));
+    },
+
     arrowFunctionsAvaiable: function() {
       var toEval = "function X(){var test = [1,2,3]; test.map(x => x*2);}";
       try {
@@ -407,55 +410,43 @@
     }
   };
 
-  // Replacement for $(document).ready() because jquery might not be available
-  // Source: https://stackoverflow.com/questions/799981/document-ready-equivalent-without-jquery
+  //Jquery might not be available, so we're checking this first
   document.addEventListener("DOMContentLoaded", function(event) {
     if (FBE.arrowFunctionsAvaiable()) {
 
-      var checkReady = function(callback) {
-        callback(jQuery);
-      }
+      var waitForJQuery = function() {
+        if (typeof jQuery == 'undefined')
+          window.setTimeout(() => {
+            waitForJQuery();
+          }, 100);
+        else {
+          jqueryReady();
+        }
+      };
 
       if (typeof jQuery == 'undefined') {
-        // Load Query without jquery:
-        // http://stackoverflow.com/a/10113434/414075
-        console.log("Load JQuery …");
-        // Load the script
         var script = document.createElement("script");
-        script.src = 'https://ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js';
+        script.src = 'https://cdnjs.cloudflare.com/ajax/libs/jquery/1.11.2/jquery.min.js';
         script.type = 'text/javascript';
         document.getElementsByTagName("head")[0].appendChild(script);
-
-        // Poll for jQuery to come into existance
-        var checkReady = function(callback) {
-          if (window.jQuery) {
-            console.log("Loading JQuery … done");
-            callback(jQuery);
-          }
-          else {
-            window.setTimeout(function() { checkReady(callback); }, 100);
-          }
-        };
       }
 
-      // Start polling...
-      checkReady(function($) {
-        // Use $ here...
-        var styles = '<link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">' +
-          '<link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">';
-        $('head').append(styles);
-        console.log("Add Style … done");
-        //TODO validate for success
-        $.getScript("https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js");
-        console.log("Add Bootstrap … done");
-        $.getScript("http://point-at-infinity.org/jssha256/jssha256.js");
-        console.log("Add JSSHA256 … done");
-        FBE.addFeedbackButton();
-        console.log("Add Feedback Button … done");
-      });
-
+      //Start Polling
+      waitForJQuery();
     } else {
       console.log("Hey there... seems that your're using a very old browser or at least a browser that isn't supporting features that we need. I'm sorry, but we disabled the feedback feature. Please use another browser!");
     }
   });
+
+  //FIXME Adding Libs like this into global scope is a very bad practice!!!!!!!
+  function jqueryReady() {
+    // now we can use JQuery
+    //TODO validate for success
+    var styles = '<link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">' +
+      '<link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">';
+    $('head').append(styles);
+    $.getScript("https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js");
+    $.getScript("http://point-at-infinity.org/jssha256/jssha256.js");
+    FBE.addFeedbackButton();
+  }
 }());
