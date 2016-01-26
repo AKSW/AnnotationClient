@@ -219,8 +219,7 @@
         listEntries = value.map((element, i) => {
             var obj = element.value;
 
-            switch (element.type)
-            {
+            switch (element.type) {
               case "uri":
                 obj = FBE.checkForAngleBrackets(obj);
                 break;
@@ -254,7 +253,7 @@
     },
 
     createComment: function(hash) {
-      var subject = '<http://localhost:8080/resource-' + hash + '>';
+      var subject = '<' + FBE.URL_RHS + 'resource-' + hash + '>';
       var nquads = subject + ' <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://rdfs.org/sioc/ns#Post>.\n' +
         subject + ' <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://rdfs.org/sioc/types#Comment>.\n' +
         subject + ' <http://rdfs.org/sioc/ns#reply_of> <' + FBE.ressourceNamespace + FBE.ressourceName + '>.\n' +
@@ -266,10 +265,10 @@
     },
 
     createCommit: function(hash) {
-      var subject = '<http://localhost:8080/patch-' + hash + '>';
-      var revision = '<http://localhost:8080/revision-' + hash + '>';
-      var delGraph = '<http://localhost:8080/delete-' + hash + '>';
-      var insGraph = '<http://localhost:8080/insert-' + hash + '>';
+      var subject = '<' + FBE.URL_RHS + 'patch-' + hash + '>';
+      var revision = '<' + FBE.URL_RHS + 'revision-' + hash + '>';
+      var delGraph = '<' + FBE.URL_RHS + 'delete-' + hash + '>';
+      var insGraph = '<' + FBE.URL_RHS + 'insert-' + hash + '>';
 
       var deletes = FBE.getDeletes(delGraph);
       var inserts = FBE.getInserts(insGraph);
