@@ -86,12 +86,13 @@
         .done(function(data, text, jqxhr) {
           hash = data.nexthash;
           console.log(hash);
-        })
-        .always(function() {
           if (FBE.Deletions.length === 0 && FBE.Inserts.length === 0)
             FBE.createComment(hash);
           else
             FBE.createCommit(hash);
+        })
+        .fail(() => {
+          FBE.userfeedback("What the ...?", "Something went terribly wrong! I'm sorry, but you can't send us feedback...", "error", false);
         });
     },
 
@@ -179,6 +180,7 @@
           FBE.parseAndUseNewTriples(data, toInsert, resourceURL);
         })
         .fail(function(jqxhr, textStatus, error) {
+          FBE.userfeedback("What the ...?", "Something went terribly wrong! I'm sorry, but you can't send us feedback...", "error", false);
           console.log(textStatus + " " + error);
         });
     },
@@ -329,25 +331,42 @@
         .done(function(data, text, jqxhr) {
           console.log("Pushed the following to Norms RHS");
           console.log(data);
+          FBE.userfeedback("Hell yeah!", "You've done a great Job! We've sent your changes to our Mastermind.", "success", false);
           FBE.pingSemanticPingbackService(hash);
         })
         .fail(function(jqxhr, textStatus, error) {
+          FBE.userfeedback("What the ...?", "Some strange error occured! Please revise your changes and try again", "error", true);
           console.log(textStatus + " " + error);
           console.log(jqxhr);
         });
     },
 
+    userfeedback: function(heading, text, type, showOnConfirm) {
+      $('#feedbackModal').modal('hide');
+      $('#feedbackModal').on('hidden.bs.modal', () => {
+        swal({
+          title: heading,
+          text: text,
+          type: type
+        }, () => {
+          if (showOnConfirm === true)
+            $('#feedbackModal').modal('show');
+        });
+        $('#feedbackModal').unbind('hidden.bs.modal');
+      });
+    },
+
     pingSemanticPingbackService: function(hash) {
-      var ping = "subject=" + encodeURI(FBE.URL_RHS + hash)
-        + "&target=" + encodeURI(FBE.ressourceNamespace + FBE.ressourceName)
-        + "&comment=" + encodeURI(hash + " at " + (new Date()).toString());
+      var ping = "subject=" + encodeURI(FBE.URL_RHS + hash) +
+        "&target=" + encodeURI(FBE.ressourceNamespace + FBE.ressourceName) +
+        "&comment=" + encodeURI(hash + " at " + (new Date()).toString());
 
       $.ajax({
-        url: FBE.URL_SPE,
-        method: "POST",
-        data: ping,
-        cache: false
-      })
+          url: FBE.URL_SPE,
+          method: "POST",
+          data: ping,
+          cache: false
+        })
         .done(function(data, text, jqxhr) {
           console.log(data);
 
@@ -443,7 +462,7 @@
 
       if (typeof jQuery == 'undefined') {
         var script = document.createElement("script");
-        script.src = 'https://cdnjs.cloudflare.com/ajax/libs/jquery/1.11.2/jquery.min.js';
+        script.src = 'https://cdnjs.cloudflare.com/ajax/libs/jquery/2.2.0/jquery.min.js';
         script.type = 'text/javascript';
         document.getElementsByTagName("head")[0].appendChild(script);
       }
@@ -460,10 +479,12 @@
     // now we can use JQuery
     //TODO validate for success
     var styles = '<link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">' +
-      '<link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">';
+      '<link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">' +
+      '<link rel="stylesheet" type="text/css" href="https://cdn.rawgit.com/lipis/bootstrap-sweetalert/master/lib/sweet-alert.css">';
     $('head').append(styles);
     $.getScript("https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js");
     $.getScript("http://point-at-infinity.org/jssha256/jssha256.js");
+    $.getScript("https://cdn.rawgit.com/lipis/bootstrap-sweetalert/master/lib/sweet-alert.min.js");
     $('head').after('<style> #feedbackButton { position: fixed; bottom: 30px; right: 30px; z-index: 1; width: 80px; height: 80px; font-size: 1em; color: #fff; background: #2C98DE; border: none; border-radius: 50%; box-shadow: 0 3px 6px rgba(0,0,0,.275); outline: none; margin: auto;}</style>');
     FBE.addFeedbackButton();
   }
