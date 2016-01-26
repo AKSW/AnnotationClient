@@ -5,10 +5,10 @@
     listEntry: function(id, subject, predicate, object) {
       var html = '<div id="feedbackListEntry' + id + '" data-id="' + id + '">' +
         ' <div class="form-group">' +
-        '   <input type="text" class="form-control" name="predicate" data_id="' + id + '" data_original="' + predicate + '" value="' + predicate + '" readonly size="37>' +
+        '   <input type="text" class="form-control" name="predicate" data_id="' + id + '" data_original="' + predicate + '" value="' + predicate + '" readonly size="33>' +
         ' </div>' +
         ' <div class="form-group">' +
-        '   <input type="text" class="form-control" name="object" data_id="' + id + '" data_original="' + object.replace('"', "&quot;") + '" value="' + object.replace('"', "&quot;") + '" readonly size="50">' +
+        '   <input type="text" class="form-control" name="object" data_id="' + id + '" data_original="' + object.replace('"', "&quot;") + '" value="' + object.replace('"', "&quot;") + '" readonly size="44">' +
         ' </div>' +
         ' <button class="btn btn-info feedbackEdit"><i class="fa fa-edit"></i></button>' +
         ' <button class="btn btn-danger feedbackRemove"><i class="fa fa-remove"></i></button>' +
@@ -481,14 +481,16 @@
     // now we can use JQuery
     //TODO validate for success
     var styles = //'<link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">' +
+    '<link rel="stylesheet" type="text/css" href="https://cdn.rawgit.com/AKSW/LDOW2016_PF_Client/master/custom_bootstrap.css">'+
       '<link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">' +
       '<link rel="stylesheet" type="text/css" href="https://cdn.rawgit.com/lipis/bootstrap-sweetalert/master/lib/sweet-alert.css">';
     $('head').append(styles);
     //$.getScript("https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js");
-    $.get("./custom_bootstrap.min.js");
+    $.getScript("https://cdn.rawgit.com/AKSW/LDOW2016_PF_Client/master/custom_bootstrap.min.js");
+    //$.get("./custom_bootstrap.min.js");
     $.getScript("http://point-at-infinity.org/jssha256/jssha256.js");
     $.getScript("https://cdn.rawgit.com/lipis/bootstrap-sweetalert/master/lib/sweet-alert.min.js");
-    $('head').after('<style> #feedbackButton { position: fixed; bottom: 30px; right: 30px; z-index: 1; width: 80px; height: 80px; font-size: 1em; color: #fff; background: #2C98DE; border: none; border-radius: 50%; box-shadow: 0 3px 6px rgba(0,0,0,.275); outline: none; margin: auto;}</style>');
+    $('head').after('<style> #feedbackButton { position: fixed; bottom: 30px; right: 30px; z-index: 1; width: 80px; height: 80px; font-size: 1.2em; color: #fff; background: #2C98DE; border: none; border-radius: 50%; box-shadow: 0 3px 6px rgba(0,0,0,.275); outline: none; margin: auto;}</style>');
     FBE.addFeedbackButton();
   }
 }());
