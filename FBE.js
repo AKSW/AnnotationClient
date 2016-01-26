@@ -328,7 +328,7 @@
         .done(function(data, text, jqxhr) {
           console.log("Pushed the following to Norms RHS");
           console.log(data);
-          //FBE.pingSemanticPingbackEndpoint();
+          FBE.pingSemanticPingbackService(hash);
         })
         .fail(function(jqxhr, textStatus, error) {
           console.log(textStatus + " " + error);
@@ -336,14 +336,17 @@
         });
     },
 
-    //call the SemanticPingback Service
-    /* example of a resource:
-    dbpedia:Leipzig
-      pingback:to <http://pingback.feedback.aksw.org/> ;
-      sioc:feed fb-feed:dbpedia-Leipzig .
-    */
-    pingSemanticPingbackEndpoint: function() {
-      $.get(FBE.URL_SPE)
+    pingSemanticPingbackService: function(hash) {
+      var ping = "subject=" + encodeURI(FBE.URL_RHS + hash)
+        + "&target=" + encodeURI(FBE.ressourceNamespace + FBE.ressourceName) 
+        + "&comment=" + encodeURI(hash + " at " + (new Date()).toString());
+
+      $.ajax({
+        url: FBE.URL_SPE,
+        method: "POST",
+        data: ping,
+        cache: false
+      })
         .done(function(data, text, jqxhr) {
           console.log(data);
         })
