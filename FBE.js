@@ -5,10 +5,10 @@
     listEntry: function(id, subject, predicate, object) {
       var html = '<div id="feedbackListEntry' + id + '" data-id="' + id + '">' +
         ' <div class="form-group">' +
-        '   <input type="text" class="form-control" name="predicate" data_id="' + id + '" data_original="' + predicate + '" value="' + predicate + '" readonly size="33>' +
+        '   <input type="text" class="form-control" name="predicate" data_id="' + id + '" data_original="' + predicate + '" value="' + predicate + '" readonly size="37>' +
         ' </div>' +
         ' <div class="form-group">' +
-        '   <input type="text" class="form-control" name="object" data_id="' + id + '" data_original="' + object.replace('"', "&quot;") + '" value="' + object.replace('"', "&quot;") + '" readonly size="44">' +
+        '   <input type="text" class="form-control" name="object" data_id="' + id + '" data_original="' + object.replace('"', "&quot;") + '" value="' + object.replace('"', "&quot;") + '" readonly size="50">' +
         ' </div>' +
         ' <button class="btn btn-info feedbackEdit"><i class="fa fa-edit"></i></button>' +
         ' <button class="btn btn-danger feedbackRemove"><i class="fa fa-remove"></i></button>' +
@@ -257,35 +257,35 @@
     },
 
     createComment: function(hash) {
-      var subject = '<' + FBE.URL_RHS + 'resource-' + hash + '>';
-      var nquads = subject + ' <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://rdfs.org/sioc/ns#Post>.\n' +
-        subject + ' <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://rdfs.org/sioc/types#Comment>.\n' +
-        subject + ' <http://rdfs.org/sioc/ns#reply_of> <' + FBE.ressourceNamespace + FBE.ressourceName + '>.\n' +
-        subject + ' <http://xmlns.com/foaf/maker> <' + $("#feedbackFormAuthor").val() + '>.\n' +
-        subject + ' <http://rdfs.org/sioc/ns#content> "' + $("#feedbackFormMessage").val() + '".\n' +
-        subject + ' <http://www.w3.org/ns/prov#atTime> "' + new Date().toISOString() + '"^^<http://www.w3.org/2001/XMLSchema#dateTime>.\n';
+      var subject = '<' + FBE.URL_RHS + hash + '-resource>';
+      var nquads = subject + ' <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://rdfs.org/sioc/ns#Post> .\n' +
+        subject + ' <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://rdfs.org/sioc/types#Comment> .\n' +
+        subject + ' <http://rdfs.org/sioc/ns#reply_of> <' + FBE.ressourceNamespace + FBE.ressourceName + '> .\n' +
+        subject + ' <http://xmlns.com/foaf/maker> <' + $("#feedbackFormAuthor").val() + '> .\n' +
+        subject + ' <http://rdfs.org/sioc/ns#content> "' + $("#feedbackFormMessage").val() + '" .\n' +
+        subject + ' <http://www.w3.org/ns/prov#atTime> "' + new Date().toISOString() + '"^^<http://www.w3.org/2001/XMLSchema#dateTime> .\n';
 
       FBE.sendFeedback(nquads, hash);
     },
 
     createCommit: function(hash) {
-      var subject = '<' + FBE.URL_RHS + 'patch-' + hash + '>';
-      var revision = '<' + FBE.URL_RHS + 'revision-' + hash + '>';
-      var delGraph = '<' + FBE.URL_RHS + 'delete-' + hash + '>';
-      var insGraph = '<' + FBE.URL_RHS + 'insert-' + hash + '>';
+      var subject = '<' + FBE.URL_RHS + hash + '>';
+      var revision = '<' + FBE.URL_RHS + hash + '-revision>';
+      var delGraph = '<' + FBE.URL_RHS + hash + '-delete>';
+      var insGraph = '<' + FBE.URL_RHS + hash + '-insert>';
 
       var deletes = FBE.getDeletes(delGraph);
       var inserts = FBE.getInserts(insGraph);
-      var nquads = subject + ' <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://vocab.eccenca.com/revision/Commit>.\n' +
-        subject + ' <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://rdfs.org/sioc/ns#Item>.\n' +
-        subject + ' <http://xmlns.com/foaf/maker> <' + $("#feedbackFormAuthor").val() + '>.\n' +
-        subject + ' <https://vocab.eccenca.com/revision/commitMessage> "' + $("#feedbackFormMessage").val() + '".\n' +
-        subject + ' <http://www.w3.org/ns/prov#atTime> "' + new Date().toISOString() + '"^^<http://www.w3.org/2001/XMLSchema#dateTime>.\n' +
-        subject + ' <http://rdfs.org/sioc/ns#reply_of> <' + FBE.ressourceNamespace + FBE.ressourceName + '>.\n' +
-        subject + ' <https://vocab.eccenca.com/revision/hasRevision> ' + revision + '.\n' +
-        revision + ' <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://vocab.eccenca.com/revision/Revision>.\n' +
-        revision + ' <https://vocab.eccenca.com/revision/deltaDelete> ' + delGraph + '.\n' +
-        revision + ' <https://vocab.eccenca.com/revision/deltaInsert> ' + insGraph + '.\n';
+      var nquads = subject + ' <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://vocab.eccenca.com/revision/Commit> .\n' +
+        subject + ' <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://rdfs.org/sioc/ns#Item> .\n' +
+        subject + ' <http://xmlns.com/foaf/maker> <' + $("#feedbackFormAuthor").val() + '> .\n' +
+        subject + ' <https://vocab.eccenca.com/revision/commitMessage> "' + $("#feedbackFormMessage").val() + '" .\n' +
+        subject + ' <http://www.w3.org/ns/prov#atTime> "' + new Date().toISOString() + '"^^<http://www.w3.org/2001/XMLSchema#dateTime> .\n' +
+        subject + ' <http://rdfs.org/sioc/ns#reply_of> <' + FBE.ressourceNamespace + FBE.ressourceName + '> .\n' +
+        subject + ' <https://vocab.eccenca.com/revision/hasRevision> ' + revision + ' .\n' +
+        revision + ' <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://vocab.eccenca.com/revision/Revision> .\n' +
+        revision + ' <https://vocab.eccenca.com/revision/deltaDelete> ' + delGraph + ' .\n' +
+        revision + ' <https://vocab.eccenca.com/revision/deltaInsert> ' + insGraph + ' .\n';
 
       FBE.sendFeedback(nquads + deletes + inserts, hash);
     },
@@ -481,16 +481,16 @@
     // now we can use JQuery
     //TODO validate for success
     var styles = //'<link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">' +
-    '<link rel="stylesheet" type="text/css" href="https://cdn.rawgit.com/AKSW/LDOW2016_PF_Client/master/custom_bootstrap.css">'+
+    '<link rel="stylesheet" type="text/css" href="http://localhost/LDOW2016_PF_Client/bootstrap.css">'+
       '<link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">' +
       '<link rel="stylesheet" type="text/css" href="https://cdn.rawgit.com/lipis/bootstrap-sweetalert/master/lib/sweet-alert.css">';
     $('head').append(styles);
     //$.getScript("https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js");
-    $.getScript("https://cdn.rawgit.com/AKSW/LDOW2016_PF_Client/master/custom_bootstrap.min.js");
+    $.getScript("http://localhost/LDOW2016_PF_Client/bootstrap.js");
     //$.get("./custom_bootstrap.min.js");
     $.getScript("http://point-at-infinity.org/jssha256/jssha256.js");
     $.getScript("https://cdn.rawgit.com/lipis/bootstrap-sweetalert/master/lib/sweet-alert.min.js");
-    $('head').after('<style> #feedbackButton { position: fixed; bottom: 30px; right: 30px; z-index: 1; width: 80px; height: 80px; font-size: 1.2em; color: #fff; background: #2C98DE; border: none; border-radius: 50%; box-shadow: 0 3px 6px rgba(0,0,0,.275); outline: none; margin: auto;}</style>');
+    $('head').after('<style> #feedbackButton { position: fixed; bottom: 30px; right: 30px; z-index: 1; width: 80px; height: 80px; font-size: 1em; color: #fff; background: #2C98DE; border: none; border-radius: 50%; box-shadow: 0 3px 6px rgba(0,0,0,.275); outline: none; margin: auto;}</style>');
     FBE.addFeedbackButton();
   }
 }());
