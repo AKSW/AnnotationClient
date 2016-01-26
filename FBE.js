@@ -82,7 +82,7 @@
       event.preventDefault();
       FBE.updateChanges();
       var hash = SHA256_hash(new Date().toISOString());
-      $.get(FBE.URL_RHS + "nextresource")
+      $.get(FBE.URL_RHS)
         .done(function(data, text, jqxhr) {
           hash = data.nexthash;
           console.log(hash);
