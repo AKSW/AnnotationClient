@@ -41,7 +41,7 @@
         '           <input id="feedbackFormAuthor" type="url" class="form-control" placeholder="Your Homepage" required>' +
         '         </div>' +
         '         <div class="form-group">' +
-        '         <textarea id="feedbackFormMessage" rows="2" form="feedbackForm" class="form-control" placeholder="Your message..." required></textarea>' +
+        '           <input id="feedbackFormMessage" type="text" class="form-control" placeholder="Your message..." required>' +
         '         </div>' +
         '        </form>' +
         '      </div>' +
@@ -259,7 +259,7 @@
         subject + ' <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://rdfs.org/sioc/types#Comment>.\n' +
         subject + ' <http://rdfs.org/sioc/ns#reply_of> <' + FBE.ressourceNamespace + FBE.ressourceName + '>.\n' +
         subject + ' <http://xmlns.com/foaf/maker> <' + $("#feedbackFormAuthor").val() + '>.\n' +
-        subject + ' <http://rdfs.org/sioc/ns#content> """' + $("#feedbackFormMessage").val() + '""".\n' +
+        subject + ' <http://rdfs.org/sioc/ns#content> "' + $("#feedbackFormMessage").val() + '".\n' +
         subject + ' <http://www.w3.org/ns/prov#atTime> "' + new Date().toISOString() + '"^^<http://www.w3.org/2001/XMLSchema#dateTime>.\n';
 
       FBE.sendFeedback(nquads, hash);
@@ -276,7 +276,7 @@
       var nquads = subject + ' <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://vocab.eccenca.com/revision/Commit>.\n' +
         subject + ' <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://rdfs.org/sioc/ns#Item>.\n' +
         subject + ' <http://xmlns.com/foaf/maker> <' + $("#feedbackFormAuthor").val() + '>.\n' +
-        subject + ' <https://vocab.eccenca.com/revision/commitMessage> """' + $("#feedbackFormMessage").val() + '""".\n' +
+        subject + ' <https://vocab.eccenca.com/revision/commitMessage> "' + $("#feedbackFormMessage").val() + '".\n' +
         subject + ' <http://www.w3.org/ns/prov#atTime> "' + new Date().toISOString() + '"^^<http://www.w3.org/2001/XMLSchema#dateTime>.\n' +
         subject + ' <http://rdfs.org/sioc/ns#reply_of> <' + FBE.ressourceNamespace + FBE.ressourceName + '>.\n' +
         subject + ' <https://vocab.eccenca.com/revision/hasRevision> ' + revision + '.\n' +
