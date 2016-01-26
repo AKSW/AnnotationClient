@@ -331,7 +331,6 @@
         .done(function(data, text, jqxhr) {
           console.log("Pushed the following to Norms RHS");
           console.log(data);
-          FBE.userfeedback("Hell yeah!", "You've done a great Job! We've sent your changes to our Mastermind.", "success", false);
           FBE.pingSemanticPingbackService(hash);
         })
         .fail(function(jqxhr, textStatus, error) {
@@ -369,11 +368,12 @@
         })
         .done(function(data, text, jqxhr) {
           console.log(data);
-
+          FBE.userfeedback("Hell yeah!", "You've done a great Job! We've sent your changes to our Mastermind.", "success", false);
           //TODO show success to user
         })
         .fail(function(jqxhr, textStatus, error) {
           console.log(textStatus + " " + error);
+          FBE.userfeedback("What the ...?", "Some strange error occured! We're sorry, that's our fault.... Please try again later!", "error", true);
         });
     },
 
