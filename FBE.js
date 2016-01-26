@@ -153,10 +153,12 @@
     },
 
     getServiceURLs: function() {
+      //TODO search for http://purl.org/net/pingback/service in foaf:
       FBE.URL_RHS = $('link[rel="resourcehostingservice"]').attr('href');
       if (FBE.isEmpty(FBE.URL_RHS)) {
         //TODO route to default RHS
       }
+      //TODO read URI from triples: pingback:to
       FBE.URL_SPE = $('link[rel="pingbackservice"]').attr('href');
       if (FBE.isEmpty(FBE.URL_SPE)) {
         //TODO route to default SPE
@@ -337,7 +339,7 @@
 
     pingSemanticPingbackService: function(hash) {
       var ping = "subject=" + encodeURI(FBE.URL_RHS + hash)
-        + "&target=" + encodeURI(FBE.ressourceNamespace + FBE.ressourceName) 
+        + "&target=" + encodeURI(FBE.ressourceNamespace + FBE.ressourceName)
         + "&comment=" + encodeURI(hash + " at " + (new Date()).toString());
 
       $.ajax({
@@ -348,6 +350,8 @@
       })
         .done(function(data, text, jqxhr) {
           console.log(data);
+
+          //TODO show success to user
         })
         .fail(function(jqxhr, textStatus, error) {
           console.log(textStatus + " " + error);
