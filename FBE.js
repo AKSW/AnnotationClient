@@ -356,9 +356,11 @@
     },
 
     pingSemanticPingbackService: function(hash) {
-      var ping = "subject=" + encodeURI(FBE.URL_RHS + hash) +
-        "&target=" + encodeURI(FBE.ressourceNamespace + FBE.ressourceName) +
-        "&comment=" + encodeURI(hash + " at " + (new Date()).toString());
+      var ping = {
+        source: "http://aksw.org/Groups/ES", //encodeURI(FBE.URL_RHS + hash),
+        target: "http://aksw.org/KurtJunghanns", //encodeURI(FBE.ressourceNamespace + FBE.ressourceName),
+        comment: "Test2" //encodeURI(hash + " at " + (new Date()).toString())
+      };
 
       $.ajax({
           url: FBE.URL_SPE,
