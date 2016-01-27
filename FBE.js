@@ -257,7 +257,8 @@
     },
 
     createComment: function(hash) {
-      var subject = '<' + FBE.URL_RHS + hash + '-resource>';
+      var plainSubject = FBE.URL_RHS + hash + '-resource';
+      var subject = '<' + plainSubject+ '>';
       var nquads = subject + ' <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://rdfs.org/sioc/ns#Post> .\n' +
         subject + ' <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://rdfs.org/sioc/types#Comment> .\n' +
         subject + ' <http://rdfs.org/sioc/ns#reply_of> <' + FBE.ressourceNamespace + FBE.ressourceName + '> .\n' +
@@ -265,11 +266,12 @@
         subject + ' <http://rdfs.org/sioc/ns#content> "' + $("#feedbackFormMessage").val() + '" .\n' +
         subject + ' <http://www.w3.org/ns/prov#atTime> "' + new Date().toISOString() + '"^^<http://www.w3.org/2001/XMLSchema#dateTime> .\n';
 
-      FBE.sendFeedback(nquads, hash);
+      FBE.sendFeedback(nquads, hash, plainSubject);
     },
 
     createCommit: function(hash) {
-      var subject = '<' + FBE.URL_RHS + hash + '>';
+      var plainSubject = FBE.URL_RHS + hash + '--patch';
+      var subject = '<' + plainSubject + '>';
       var revision = '<' + FBE.URL_RHS + hash + '-revision>';
       var delGraph = '<' + FBE.URL_RHS + hash + '-delete>';
       var insGraph = '<' + FBE.URL_RHS + hash + '-insert>';
@@ -287,7 +289,7 @@
         revision + ' <https://vocab.eccenca.com/revision/deltaDelete> ' + delGraph + ' .\n' +
         revision + ' <https://vocab.eccenca.com/revision/deltaInsert> ' + insGraph + ' .\n';
 
-      FBE.sendFeedback(nquads + deletes + inserts, hash);
+      FBE.sendFeedback(nquads + deletes + inserts, hash, plainSubject);
     },
 
     getInserts: function(graph) {
@@ -318,7 +320,7 @@
     },
 
     //publish the new ressource like descripted in the paper of Natanael
-    sendFeedback: function(tosend, hash) {
+    sendFeedback: function(tosend, hash, subject) {
       console.log(tosend);
 
       $.ajax({
@@ -331,7 +333,7 @@
         .done(function(data, text, jqxhr) {
           console.log("Pushed the following to Norms RHS");
           console.log(data);
-          FBE.pingSemanticPingbackService(hash);
+          FBE.pingSemanticPingbackService(hash, subject);
         })
         .fail(function(jqxhr, textStatus, error) {
           FBE.userfeedback("What the ...?", "Some strange error occured! Please revise your changes and try again", "error", true);
@@ -355,11 +357,11 @@
       });
     },
 
-    pingSemanticPingbackService: function(hash) {
+    pingSemanticPingbackService: function(hash, subject) {
       var ping = {
-        source: "http://aksw.org/Groups/ES", //encodeURI(FBE.URL_RHS + hash),
-        target: "http://aksw.org/KurtJunghanns", //encodeURI(FBE.ressourceNamespace + FBE.ressourceName),
-        comment: "Test2" //encodeURI(hash + " at " + (new Date()).toString())
+        source: encodeURI(subject),
+        target: encodeURI(FBE.ressourceNamespace + FBE.ressourceName),
+        comment: encodeURI(hash + " at " + (new Date()).toString())
       };
 
       $.ajax({
