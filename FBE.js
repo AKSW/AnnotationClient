@@ -32,13 +32,13 @@
         '      <div class="modal-body">' +
         '       <div>' +
         '         <h4>Do you want to edit Resources on this Page?</h4><br>' +
-        '         <button type="button" id="feddbackEditResources" class="btn btn-info">Edit Resources</button>' +
+        '         <button type="button" id="feddbackEditResources" class="btn btn-info">Create Patch</button>' +
         '       </div>' +
         '        <hr>' +
         '        <form id="feedbackForm">' +
         '         <p class="help-block">Please leave us a comment and your identity.</p>' +
         '         <div class="form-group">' +
-        '           <input id="feedbackFormAuthor" type="url" class="form-control" placeholder="Your Homepage" required>' +
+        '           <input id="feedbackFormAuthor" type="url" class="form-control" placeholder="Your WebID" required>' +
         '         </div>' +
         '         <div class="form-group">' +
         '           <input id="feedbackFormMessage" type="text" class="form-control" placeholder="Your message..." required>' +
@@ -47,7 +47,7 @@
         '      </div>' +
         '      <div class="modal-footer">' +
         '       <button type="button" class="btn btn-primary feedbackbtn" data-dismiss="modal"><i class="fa fa-close"></i> Close</button>' +
-        '       <button id="feedbackModalSave" type="submit" form="feedbackForm" class="btn btn-success feedbackbtn"><i class="fa fa-download"></i> Save changes</button>' +
+        '       <button id="feedbackModalSave" type="submit" form="feedbackForm" class="btn btn-success feedbackbtn"><i class="fa fa-download"></i>Submit</button>' +
         '      </div>' +
         '    </div>' +
         '  </div>' +
@@ -212,7 +212,7 @@
       FBE.ressourceNamespace = firstKey.substring(0, firstKey.length - FBE.ressourceName.length);
       console.log("Namespace: " + FBE.ressourceNamespace + "\n Resource: " + FBE.ressourceName);
       if (toInsert === false) //little hack to insert the modal title
-        $("#feedbackModal").find('.modal-title').text('Feedback on Ressource ' + decodeURIComponent(FBE.ressourceName));
+        $("#feedbackModal").find('.modal-title').text('Feedback on: ' + decodeURIComponent(FBE.ressourceNamespace + FBE.ressourceName));
 
       var listEntries = "";
       var counter = 1;
@@ -250,7 +250,7 @@
       if (toInsert === true) {
         var list = $("#feedbackEntryList");
         list.append(listEntries); // FIXME around 155ms for Leipzig
-        list.append('<button class="btn btn-success feedbackAdd"><i class="fa fa-plus"></i> Add Element</button>');
+        list.append('<button class="btn btn-success feedbackAdd"><i class="fa fa-plus"></i> Add Property </button>');
         list.find(".feedbackAdd").click(FBE_Handler.addTriple);
         $("#feedbackModal_progressbar").remove();
       }
@@ -492,12 +492,12 @@
     // now we can use JQuery
     //TODO validate for success
     var styles = //'<link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">' +
-      '<link rel="stylesheet" type="text/css" href="http://localhost/LDOW2016_PF_Client/prefixed_bootstrap.css">' +
+      '<link rel="stylesheet" type="text/css" href="prefixed_bootstrap.css">' +
       '<link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">' +
       '<link rel="stylesheet" type="text/css" href="https://cdn.rawgit.com/lipis/bootstrap-sweetalert/master/lib/sweet-alert.css">';
     $('head').append(styles);
     //$.getScript("https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js");
-    $.getScript("http://localhost/LDOW2016_PF_Client/bootstrap.js");
+    $.getScript("bootstrap.js");
     //$.get("./custom_bootstrap.min.js");
     $.getScript("http://point-at-infinity.org/jssha256/jssha256.js");
     $.getScript("https://cdn.rawgit.com/lipis/bootstrap-sweetalert/master/lib/sweet-alert.min.js");
