@@ -47,7 +47,7 @@
         '      </div>' +
         '      <div class="modal-footer">' +
         '       <button type="button" class="btn btn-primary feedbackbtn" data-dismiss="modal"><i class="fa fa-close"></i> Close</button>' +
-        '       <button id="feedbackModalSave" type="submit" form="feedbackForm" class="btn btn-success feedbackbtn"><i class="fa fa-download"></i>Submit</button>' +
+        '       <button id="feedbackModalSave" type="submit" form="feedbackForm" class="btn btn-success feedbackbtn"><i class="fa fa-download"></i> Submit</button>' +
         '      </div>' +
         '    </div>' +
         '  </div>' +
@@ -160,7 +160,7 @@
         FBE.URL_RHS = "http://resource.feedback.aksw.org"; //FIXME There will be no default route?!
       }
       //TODO read URI from triples: pingback:to
-      FBE.URL_SPE = $('link[rel="pingbackservice"]').attr('href');
+      FBE.URL_SPE = $('link[rel="pingback"]').attr('href');
       if (FBE.isEmpty(FBE.URL_SPE)) {
         FBE.URL_SPE = "http://pingback.feedback.aksw.org"; //FIXME There will be no default route?!
       }
@@ -319,8 +319,6 @@
 
     //publish the new ressource like descripted in the paper of Natanael
     sendFeedback: function(tosend, hash) {
-      console.log(tosend);
-
       $.ajax({
           url: FBE.URL_RHS + hash,
           method: "POST",
@@ -362,6 +360,9 @@
         comment: "Test2" //encodeURI(hash + " at " + (new Date()).toString())
       };
 
+      //TODO show rödelndes zeichen
+      $('#feedbackModalSave i').remove();
+      $('#feedbackModalSave').prepend(' <i class="fa fa-spinner fa-pulse"></i>');
       $.ajax({
           url: FBE.URL_SPE,
           method: "POST",
@@ -369,13 +370,15 @@
           cache: false
         })
         .done(function(data, text, jqxhr) {
-          console.log(data);
           FBE.userfeedback("Hell yeah!", "You've done a great Job! We've sent your changes to our Mastermind.", "success", false);
-          //TODO show success to user
         })
         .fail(function(jqxhr, textStatus, error) {
           console.log(textStatus + " " + error);
           FBE.userfeedback("What the ...?", "Some strange error occured! We're sorry, that's our fault.... Please try again later!", "error", true);
+        })
+        .always(() => {
+          $('#feedbackModalSave i').remove();
+          $('#feedbackModalSave').prepend(' <i class="fa fa-download"></i>');
         });
     },
 
