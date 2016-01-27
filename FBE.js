@@ -22,7 +22,7 @@
     },
 
     getModal: function() {
-      return '<div id="feedbackModal" class="modal fade" tabindex="-1" role="dialog">' +
+      return '<div class="fbe"><div id="feedbackModal" class="modal fade" tabindex="-1" role="dialog">' +
         '  <div class="modal-dialog modal-lg">' +
         '    <div class="modal-content">' +
         '      <div class="modal-header">' +
@@ -51,7 +51,7 @@
         '      </div>' +
         '    </div>' +
         '  </div>' +
-        '</div>';
+        '</div></div>';
     },
 
     getListTemplate: function() {
@@ -481,7 +481,7 @@
     // now we can use JQuery
     //TODO validate for success
     var styles = //'<link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">' +
-    '<link rel="stylesheet" type="text/css" href="http://localhost/LDOW2016_PF_Client/bootstrap.css">'+
+    '<link rel="stylesheet" type="text/css" href="http://localhost/LDOW2016_PF_Client/prefixed_bootstrap.css">'+
       '<link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">' +
       '<link rel="stylesheet" type="text/css" href="https://cdn.rawgit.com/lipis/bootstrap-sweetalert/master/lib/sweet-alert.css">';
     $('head').append(styles);
