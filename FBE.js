@@ -157,12 +157,12 @@
       //TODO search for http://purl.org/net/pingback/service in foaf:
       FBE.URL_RHS = $('link[rel="resourcehostingservice"]').attr('href');
       if (FBE.isEmpty(FBE.URL_RHS)) {
-        FBE.URL_RHS = "http://resource.feedback.aksw.org"; //FIXME There will be no default route?!
+        FBE.URL_RHS = "http://resource.feedback.aksw.org/"; //FIXME There will be no default route?!
       }
       //TODO read URI from triples: pingback:to
       FBE.URL_SPE = $('link[rel="pingback"]').attr('href');
       if (FBE.isEmpty(FBE.URL_SPE)) {
-        FBE.URL_SPE = "http://pingback.feedback.aksw.org"; //FIXME There will be no default route?!
+        FBE.URL_SPE = "http://pingback.feedback.aksw.org/"; //FIXME There will be no default route?!
       }
     },
 
@@ -270,7 +270,7 @@
     },
 
     createCommit: function(hash) {
-      var plainSubject = FBE.URL_RHS + hash + '--patch';
+      var plainSubject = FBE.URL_RHS + hash + '-patch';
       var subject = '<' + plainSubject + '>';
       var revision = '<' + FBE.URL_RHS + hash + '-revision>';
       var delGraph = '<' + FBE.URL_RHS + hash + '-delete>';
