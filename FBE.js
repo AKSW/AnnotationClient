@@ -157,12 +157,12 @@
       //TODO search for http://purl.org/net/pingback/service in foaf:
       FBE.URL_RHS = $('link[rel="resourcehostingservice"]').attr('href');
       if (FBE.isEmpty(FBE.URL_RHS)) {
-        FBE.URL_RHS = "http://resource.feedback.aksw.org";//FIXME There will be no default route?!
+        FBE.URL_RHS = "http://resource.feedback.aksw.org"; //FIXME There will be no default route?!
       }
       //TODO read URI from triples: pingback:to
       FBE.URL_SPE = $('link[rel="pingbackservice"]').attr('href');
       if (FBE.isEmpty(FBE.URL_SPE)) {
-        FBE.URL_SPE = "http://pingback.feedback.aksw.org";//FIXME There will be no default route?!
+        FBE.URL_SPE = "http://pingback.feedback.aksw.org"; //FIXME There will be no default route?!
       }
     },
 
@@ -458,7 +458,10 @@
             waitForJQuery();
           }, 100);
         else {
-          jqueryReady();
+          if (checkJqueryVersion)
+            jqueryReady();
+          else
+            console.log("Seems you're using a very old JQuery version. We need at least version 1.9.1 or higher!");
         }
       };
 
@@ -476,12 +479,20 @@
     }
   });
 
+  function checkJqueryVersion() {
+    var version = $.fn.jquery.split(' ')[0].split('.');
+    if ((version[0] < 2 && version[1] < 9) || (version[0] == 1 && version[1] == 9 && version[2] < 1) || (version[0] > 2))
+      return false;
+    else
+      return true;
+  }
+
   //FIXME Adding Libs like this into global scope is a very bad practice!!!!!!!
   function jqueryReady() {
     // now we can use JQuery
     //TODO validate for success
     var styles = //'<link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">' +
-    '<link rel="stylesheet" type="text/css" href="http://localhost/LDOW2016_PF_Client/prefixed_bootstrap.css">'+
+      '<link rel="stylesheet" type="text/css" href="http://localhost/LDOW2016_PF_Client/prefixed_bootstrap.css">' +
       '<link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">' +
       '<link rel="stylesheet" type="text/css" href="https://cdn.rawgit.com/lipis/bootstrap-sweetalert/master/lib/sweet-alert.css">';
     $('head').append(styles);
