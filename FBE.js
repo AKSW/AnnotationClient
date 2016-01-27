@@ -193,7 +193,7 @@
     },
 
     extractResourceUrl: function() {
-      var url = $('link[rel="foaf:primarytopic"]').attr('href');
+      var url = $('link[rel="foaf:primaryTopic"]').attr('href');
       if (FBE.isEmpty(url)) {
         url = $('link[rev="describedby"]').attr('href');
       }
