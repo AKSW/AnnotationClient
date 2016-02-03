@@ -169,6 +169,11 @@
     getTriples: function(toInsert) {
       var jsonURL = FBE.extractJsonUrl();
       var resourceURL = FBE.extractResourceUrl();
+      if(FBE.isEmpty(jsonURL) || FBE.isEmpty(resourceURL)){
+        $('#feddbackEditResources').addClass('disabled').prop("disabled",true);
+        $('#feddbackEditResources').after('<i class="help-block">We are sorry but there are no editable resources on this page.</i>');
+        return;
+      }
       //Test Environment Workaround
       if (location.toString().startsWith("file://") || location.toString().startsWith("http://kdi-student.de") || location.toString().startsWith("http://localhost")) {
         jsonURL = "Taucha.json";
@@ -196,6 +201,8 @@
       var url = $('link[rel="foaf:primaryTopic"]').attr('href');
       if (FBE.isEmpty(url)) {
         url = $('link[rev="describedby"]').attr('href');
+        if(FBE.isEmpty(url)){ //TODO No resource available
+        }
       }
       return url;
     },
@@ -497,7 +504,7 @@
   function jqueryReady() {
     // now we can use JQuery
     //TODO validate for success
-    var styles = //'<link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">' +
+    /*var styles = //'<link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">' +
       '<link rel="stylesheet" type="text/css" href="prefixed_bootstrap.css">' +
       '<link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">' +
       '<link rel="stylesheet" type="text/css" href="https://cdn.rawgit.com/lipis/bootstrap-sweetalert/master/lib/sweet-alert.css">';
@@ -506,7 +513,7 @@
     $.getScript("bootstrap.js");
     //$.get("./custom_bootstrap.min.js");
     $.getScript("http://point-at-infinity.org/jssha256/jssha256.js");
-    $.getScript("https://cdn.rawgit.com/lipis/bootstrap-sweetalert/master/lib/sweet-alert.min.js");
+    $.getScript("https://cdn.rawgit.com/lipis/bootstrap-sweetalert/master/lib/sweet-alert.min.js");*/
     $('head').after('<style> #feedbackButton { position: fixed; bottom: 30px; right: 30px; z-index: 1; width: 80px; height: 80px; font-size: 1em; color: #fff; background: #2C98DE; border: none; border-radius: 50%; box-shadow: 0 3px 6px rgba(0,0,0,.275); outline: none; margin: auto;}</style>');
     FBE.addFeedbackButton();
   }
