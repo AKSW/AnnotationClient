@@ -27,7 +27,7 @@
         '    <div class="modal-content">' +
         '      <div class="modal-header">' +
         '        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>' +
-        '        <h4 class="modal-title">Modal Title</h4>' +
+        '        <h4 class="modal-title">Your Feedback</h4>' +
         '      </div>' +
         '      <div class="modal-body">' +
         '       <div>' +
@@ -140,6 +140,9 @@
       $("body").append(FBE_Factory.getModal());
       $("#feddbackEditResources").click(FBE_Handler.loadResources);
       $("#feedbackForm").submit(FBE_Handler.sendFeedback);
+      var url = window.location.href.split('/');
+      FBE.ressourceName = url.pop();
+      FBE.ressourceNamespace = url.join('/') + '/';
       FBE.getServiceURLs();
       FBE.getTriples((false));
     },
