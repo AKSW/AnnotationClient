@@ -162,18 +162,20 @@
       if (FBE.isEmpty(FBE.URL_RHS)) {
         FBE.URL_RHS = "http://resource.feedback.aksw.org/"; //FIXME There will be no default route?!
       }
-      //TODO read URI from triples: pingback:to
       FBE.URL_SPE = $('link[rel="pingback"]').attr('href');
       if (FBE.isEmpty(FBE.URL_SPE)) {
-        FBE.URL_SPE = "http://pingback.feedback.aksw.org/"; //FIXME There will be no default route?!
+        FBE.URL_SPE = $('link[rel="pingback:to"]').attr('href');
+        if (FBE.isEmpty(FBE.URL_SPE)) {
+          FBE.URL_SPE = "http://pingback.feedback.aksw.org/"; //FIXME There will be no default route?!
+        }
       }
     },
 
     getTriples: function(toInsert) {
       var jsonURL = FBE.extractJsonUrl();
       var resourceURL = FBE.extractResourceUrl();
-      if(FBE.isEmpty(jsonURL) || FBE.isEmpty(resourceURL)){
-        $('#feddbackEditResources').addClass('disabled').prop("disabled",true);
+      if (FBE.isEmpty(jsonURL) || FBE.isEmpty(resourceURL)) {
+        $('#feddbackEditResources').addClass('disabled').prop("disabled", true);
         $('#feddbackEditResources').after('<i class="help-block">We are sorry but there are no editable resources on this page.</i>');
         return;
       }
@@ -204,7 +206,7 @@
       var url = $('link[rel="foaf:primaryTopic"]').attr('href');
       if (FBE.isEmpty(url)) {
         url = $('link[rev="describedby"]').attr('href');
-        if(FBE.isEmpty(url)){ //TODO No resource available
+        if (FBE.isEmpty(url)) { //TODO No resource available
         }
       }
       return url;
@@ -268,7 +270,7 @@
 
     createComment: function(hash) {
       var plainSubject = FBE.URL_RHS + hash + '-resource';
-      var subject = '<' + plainSubject+ '>';
+      var subject = '<' + plainSubject + '>';
       var nquads = subject + ' <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://rdfs.org/sioc/ns#Post> .\n' +
         subject + ' <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://rdfs.org/sioc/types#Comment> .\n' +
         subject + ' <http://rdfs.org/sioc/ns#reply_of> <' + FBE.ressourceNamespace + FBE.ressourceName + '> .\n' +
