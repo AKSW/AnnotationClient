@@ -1,3 +1,9 @@
 {
-  "esnext": true
+  "eqeqeq": true, // true: Require triple equals (===) for comparison
+  "strict": true, // true: Requires all functions run in ES5 Strict Mode
+
+  "esnext": true, // true: Allow ES.next (ES6) syntax (ex: `const`)
+  "browser": true, // Web Browser (window, document, etc)
+  "devel": true, // Development/debugging (alert, confirm, etc)
+  "jquery": true // jQuery
 }

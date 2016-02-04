@@ -425,7 +425,7 @@
             }
           };
         }
-        if (input.name == "predicate") {
+        if (input.name === "predicate") {
           changes[input.attributes.data_id.value].old.predicate = input.attributes.data_original.value;
           changes[input.attributes.data_id.value].new.predicate = input.value;
         } else {
@@ -471,7 +471,7 @@
     if (FBE.arrowFunctionsAvaiable()) {
 
       var waitForJQuery = function() {
-        if (typeof jQuery == 'undefined')
+        if (typeof jQuery === 'undefined')
           window.setTimeout(() => {
             waitForJQuery();
           }, 100);
@@ -483,7 +483,7 @@
         }
       };
 
-      if (typeof jQuery == 'undefined') {
+      if (typeof jQuery === 'undefined') {
         var script = document.createElement("script");
         script.src = 'https://cdnjs.cloudflare.com/ajax/libs/jquery/2.2.0/jquery.min.js';
         script.type = 'text/javascript';
@@ -499,7 +499,7 @@
 
   function checkJqueryVersion() {
     var version = $.fn.jquery.split(' ')[0].split('.');
-    if ((version[0] < 2 && version[1] < 9) || (version[0] == 1 && version[1] == 9 && version[2] < 1) || (version[0] > 2))
+    if ((version[0] < 2 && version[1] < 9) || (version[0] === 1 && version[1] === 9 && version[2] < 1) || (version[0] > 2))
       return false;
     else
       return true;
