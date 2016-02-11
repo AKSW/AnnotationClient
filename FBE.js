@@ -1,5 +1,5 @@
 (function() {
-  "use strict";
+  'use strict';
 
   var FBE_Factory = {
     listEntry: function(id, subject, predicate, object) {
@@ -8,7 +8,7 @@
         '   <input type="text" class="form-control" name="predicate" data_id="' + id + '" data_original="' + predicate + '" value="' + predicate + '" readonly size="37>' +
         ' </div>' +
         ' <div class="form-group">' +
-        '   <input type="text" class="form-control" name="object" data_id="' + id + '" data_original="' + object.replace('"', "&quot;") + '" value="' + object.replace('"', "&quot;") + '" readonly size="50">' +
+        '   <input type="text" class="form-control" name="object" data_id="' + id + '" data_original="' + object.replace('"', '&quot;') + '" value="' + object.replace('"', '&quot;') + '" readonly size="50">' +
         ' </div>' +
         ' <button class="btn btn-info feedbackEdit"><i class="fa fa-edit"></i></button>' +
         ' <button class="btn btn-danger feedbackRemove"><i class="fa fa-remove"></i></button>' +
@@ -64,9 +64,9 @@
 
   var FBE_Handler = {
     openFeedbackModal: function() {
-      var modal = $("#feedbackModal");
+      var modal = $('#feedbackModal');
       if (modal.size() !== 0)
-        $("#feedbackModal").modal();
+        $('#feedbackModal').modal();
       else {
         FBE.createFeedbackModal();
         FBE_Handler.openFeedbackModal();
@@ -83,7 +83,7 @@
       FBE.updateChanges();
       var hash = SHA256_hash(new Date().toISOString());
       $.get(FBE.URL_RHS)
-        .done(function(data, text, jqxhr) {
+        .done((data) => {
           hash = data.nexthash;
           console.log(hash);
           if (FBE.Deletions.length === 0 && FBE.Inserts.length === 0)
@@ -92,54 +92,54 @@
             FBE.createCommit(hash);
         })
         .fail(() => {
-          FBE.userfeedback("What the ...?", "Something went terribly wrong! I'm sorry, but you can't send us feedback...", "error", false);
+          FBE.userfeedback('What the ...?', 'Something went terribly wrong! I am sorry, but you can not send us feedback...', 'error', false);
         });
     },
 
     activateEditMode: function(event) {
       event.preventDefault();
-      var id = $(event.target).closest("div").attr("id");
-      $("#" + id + " > div > input").prop("readonly", false);
-      $("#" + id).find(".feedbackEdit").hide();
+      var id = $(event.target).closest('div').attr('id');
+      $('#' + id + ' > div > input').prop('readonly', false);
+      $('#' + id).find('.feedbackEdit').hide();
     },
 
     removeTriple: function(event) {
       event.preventDefault();
-      var id = $(event.target).closest("div").attr("id");
-      $("#" + id + " > div > input").prop("readonly", false);
-      $("#" + id + " > div > input").addClass("remove");
-      $("#" + id).hide();
-      $("#" + id).next().hide();
+      var id = $(event.target).closest('div').attr('id');
+      $('#' + id + ' > div > input').prop('readonly', false);
+      $('#' + id + ' > div > input').addClass('remove');
+      $('#' + id).hide();
+      $('#' + id).next().hide();
     },
 
     addTriple: function(event) {
       event.preventDefault();
-      var id = parseInt($("#feedbackEntryList > div:last").attr("data_id")) + 1;
-      var entry = FBE_Factory.listEntry(id, "namespace", "", "") + '<br>';
-      $("#feedbackEntryList").find(".feedbackAdd").before(entry);
-      $("#feedbackEntryList #feedbackListEntry" + id + " > button.feedbackEdit").click();
-      $("#feedbackEntryList #feedbackListEntry" + id + " input").addClass("new");
+      var id = parseInt($('#feedbackEntryList > div:last').attr('data_id')) + 1;
+      var entry = FBE_Factory.listEntry(id, 'namespace', '', '') + '<br>';
+      $('#feedbackEntryList').find('.feedbackAdd').before(entry);
+      $('#feedbackEntryList #feedbackListEntry' + id + ' > button.feedbackEdit').click();
+      $('#feedbackEntryList #feedbackListEntry' + id + ' input').addClass('new');
     }
   };
 
   var FBE = {
 
-    ressourceNamespace: "", //like "http://dbpedia.org/resource/""
-    ressourceName: "", //like "Taucha"
+    ressourceNamespace: '', //like 'http://dbpedia.org/resource/''
+    ressourceName: '', //like 'Taucha'
     Deletions: [], //Array like : [{subject, predicate, object, key}]
     Inserts: [], //Array like : [{subject, predicate, object, key}]
-    URL_RHS: "", // RHS ^= Resource Hosting Service
-    URL_SPE: "", //SPE ^= Semantic Pingback Endpoint
+    URL_RHS: '', // RHS ^= Resource Hosting Service
+    URL_SPE: '', //SPE ^= Semantic Pingback Endpoint
 
     addFeedbackButton: function() {
-      $("body").append('<button id="feedbackButton" type="button" class="">Give Feedback</button>');
-      $("#feedbackButton").click(FBE_Handler.openFeedbackModal);
+      $('body').append('<button id="feedbackButton" type="button" class="">Give Feedback</button>');
+      $('#feedbackButton').click(FBE_Handler.openFeedbackModal);
     },
 
     createFeedbackModal: function() {
-      $("body").append(FBE_Factory.getModal());
-      $("#feddbackEditResources").click(FBE_Handler.loadResources);
-      $("#feedbackForm").submit(FBE_Handler.sendFeedback);
+      $('body').append(FBE_Factory.getModal());
+      $('#feddbackEditResources').click(FBE_Handler.loadResources);
+      $('#feedbackForm').submit(FBE_Handler.sendFeedback);
       var url = window.location.href.split('/');
       FBE.ressourceName = url.pop();
       FBE.ressourceNamespace = url.join('/') + '/';
@@ -148,11 +148,11 @@
     },
 
     fillFeedbackModal: function() {
-      var modal = $("#feedbackModal");
-      modal.find("#feddbackEditResources").closest("div").remove();
-      modal.find("hr:first").before(FBE_Factory.getListTemplate);
-      modal.find("#feedbackEntryList").on("click", "button.feedbackEdit", FBE_Handler.activateEditMode);
-      modal.find("#feedbackEntryList").on("click", "button.feedbackRemove", FBE_Handler.removeTriple);
+      var modal = $('#feedbackModal');
+      modal.find('#feddbackEditResources').closest('div').remove();
+      modal.find('hr:first').before(FBE_Factory.getListTemplate);
+      modal.find('#feedbackEntryList').on('click', 'button.feedbackEdit', FBE_Handler.activateEditMode);
+      modal.find('#feedbackEntryList').on('click', 'button.feedbackRemove', FBE_Handler.removeTriple);
       FBE.getTriples(true);
     },
 
@@ -160,13 +160,13 @@
       //TODO search for http://purl.org/net/pingback/service in foaf:
       FBE.URL_RHS = $('link[rel="resourcehostingservice"]').attr('href');
       if (FBE.isEmpty(FBE.URL_RHS)) {
-        FBE.URL_RHS = "http://resource.feedback.aksw.org/"; //FIXME There will be no default route?!
+        FBE.URL_RHS = 'http://resource.feedback.aksw.org/'; //FIXME There will be no default route?!
       }
       FBE.URL_SPE = $('link[rel="pingback"]').attr('href');
       if (FBE.isEmpty(FBE.URL_SPE)) {
         FBE.URL_SPE = $('link[rel="pingback:to"]').attr('href');
         if (FBE.isEmpty(FBE.URL_SPE)) {
-          FBE.URL_SPE = "http://pingback.feedback.aksw.org/"; //FIXME There will be no default route?!
+          FBE.URL_SPE = 'http://pingback.feedback.aksw.org/'; //FIXME There will be no default route?!
         }
       }
     },
@@ -175,23 +175,23 @@
       var jsonURL = FBE.extractJsonUrl();
       var resourceURL = FBE.extractResourceUrl();
       if (FBE.isEmpty(jsonURL) || FBE.isEmpty(resourceURL)) {
-        $('#feddbackEditResources').addClass('disabled').prop("disabled", true);
+        $('#feddbackEditResources').addClass('disabled').prop('disabled', true);
         $('#feddbackEditResources').after('<i class="help-block">We are sorry but there are no editable resources on this page.</i>');
         return;
       }
       //Test Environment Workaround
-      if (location.toString().startsWith("file://") || location.toString().startsWith("http://kdi-student.de") || location.toString().startsWith("http://localhost")) {
-        jsonURL = "Taucha.json";
-        //resourceURL = "http://de.dbpedia.org/resource/Taucha";
+      if (location.toString().startsWith('file://') || location.toString().startsWith('http://kdi-student.de') || location.toString().startsWith('http://localhost')) {
+        jsonURL = 'Taucha.json';
+        //resourceURL = 'http://de.dbpedia.org/resource/Taucha';
       }
 
       $.get(jsonURL)
-        .done(function(data, text, jqxhr) {
+        .done((data) => {
           FBE.parseAndUseNewTriples(data, toInsert, resourceURL);
         })
-        .fail(function(jqxhr, textStatus, error) {
-          FBE.userfeedback("What the ...?", "Something went terribly wrong! I'm sorry, but you can't send us feedback...", "error", false);
-          console.log(textStatus + " " + error);
+        .fail((jqxhr, textStatus, error) => {
+          FBE.userfeedback('What the ...?', 'Something went terribly wrong! I am sorry, but you can not send us feedback...', 'error', false);
+          console.log(textStatus + ' ' + error);
         });
     },
 
@@ -219,14 +219,14 @@
       var triples = data[firstKey];
 
       //update namespace and name
-      var namespaceParts = firstKey.split("/");
+      var namespaceParts = firstKey.split('/');
       FBE.ressourceName = namespaceParts[namespaceParts.length - 1];
       FBE.ressourceNamespace = firstKey.substring(0, firstKey.length - FBE.ressourceName.length);
-      console.log("Namespace: " + FBE.ressourceNamespace + "\n Resource: " + FBE.ressourceName);
+      console.log('Namespace: ' + FBE.ressourceNamespace + '\n Resource: ' + FBE.ressourceName);
       if (toInsert === false) //little hack to insert the modal title
-        $("#feedbackModal").find('.modal-title').text('Feedback on: ' + decodeURIComponent(FBE.ressourceNamespace + FBE.ressourceName));
+        $('#feedbackModal').find('.modal-title').text('Feedback on: ' + decodeURIComponent(FBE.ressourceNamespace + FBE.ressourceName));
 
-      var listEntries = "";
+      var listEntries = '';
       var counter = 1;
 
       for (var key in triples) {
@@ -236,35 +236,35 @@
             var obj = element.value;
 
             switch (element.type) {
-              case "uri":
+              case 'uri':
                 obj = FBE.checkForAngleBrackets(obj);
                 break;
 
-              case "literal":
-                obj = "&quot;" + obj + "&quot;";
+              case 'literal':
+                obj = '&quot;' + obj + '&quot;';
 
                 if (element.datatype)
                   obj = obj + '^^' + FBE.checkForAngleBrackets(element.datatype);
                 else if (element.lang)
-                  obj = obj + "@" + element.lang;
+                  obj = obj + '@' + element.lang;
                 break;
             }
 
             return FBE_Factory.listEntry(i + counter,
               firstKey,
               FBE.checkForAngleBrackets(key),
-              obj) + "<br>";
+              obj) + '<br>';
           })
           .reduce((prev, curr) => prev + curr, listEntries);
 
         counter += Object.keys(value).length;
       }
       if (toInsert === true) {
-        var list = $("#feedbackEntryList");
+        var list = $('#feedbackEntryList');
         list.append(listEntries); // FIXME around 155ms for Leipzig
         list.append('<button class="btn btn-success feedbackAdd"><i class="fa fa-plus"></i> Add Property </button>');
-        list.find(".feedbackAdd").click(FBE_Handler.addTriple);
-        $("#feedbackModal_progressbar").remove();
+        list.find('.feedbackAdd').click(FBE_Handler.addTriple);
+        $('#feedbackModal_progressbar').remove();
       }
     },
 
@@ -274,8 +274,8 @@
       var nquads = subject + ' <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://rdfs.org/sioc/ns#Post> .\n' +
         subject + ' <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://rdfs.org/sioc/types#Comment> .\n' +
         subject + ' <http://rdfs.org/sioc/ns#reply_of> <' + FBE.ressourceNamespace + FBE.ressourceName + '> .\n' +
-        subject + ' <http://xmlns.com/foaf/maker> <' + $("#feedbackFormAuthor").val() + '> .\n' +
-        subject + ' <http://rdfs.org/sioc/ns#content> "' + $("#feedbackFormMessage").val() + '" .\n' +
+        subject + ' <http://xmlns.com/foaf/maker> <' + $('#feedbackFormAuthor').val() + '> .\n' +
+        subject + ' <http://rdfs.org/sioc/ns#content> "' + $('#feedbackFormMessage').val() + '" .\n' +
         subject + ' <http://www.w3.org/ns/prov#atTime> "' + new Date().toISOString() + '"^^<http://www.w3.org/2001/XMLSchema#dateTime> .\n';
 
       FBE.sendFeedback(nquads, hash, plainSubject);
@@ -292,8 +292,8 @@
       var inserts = FBE.getInserts(insGraph);
       var nquads = subject + ' <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://vocab.eccenca.com/revision/Commit> .\n' +
         subject + ' <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://rdfs.org/sioc/ns#Item> .\n' +
-        subject + ' <http://xmlns.com/foaf/maker> <' + $("#feedbackFormAuthor").val() + '> .\n' +
-        subject + ' <https://vocab.eccenca.com/revision/commitMessage> "' + $("#feedbackFormMessage").val() + '" .\n' +
+        subject + ' <http://xmlns.com/foaf/maker> <' + $('#feedbackFormAuthor').val() + '> .\n' +
+        subject + ' <https://vocab.eccenca.com/revision/commitMessage> "' + $('#feedbackFormMessage').val() + '" .\n' +
         subject + ' <http://www.w3.org/ns/prov#atTime> "' + new Date().toISOString() + '"^^<http://www.w3.org/2001/XMLSchema#dateTime> .\n' +
         subject + ' <http://rdfs.org/sioc/ns#reply_of> <' + FBE.ressourceNamespace + FBE.ressourceName + '> .\n' +
         subject + ' <https://vocab.eccenca.com/revision/hasRevision> ' + revision + ' .\n' +
@@ -305,28 +305,28 @@
     },
 
     getInserts: function(graph) {
-      var inserts = "";
+      var inserts = '';
       if (FBE.Inserts.length !== 0) {
         inserts = FBE.Inserts
-          .map(obj => FBE.checkForAngleBrackets(obj.subject) + ' ' + obj.predicate + ' ' + obj.object + ' ' + graph + '.\n')
+          .map((obj) => FBE.checkForAngleBrackets(obj.subject) + ' ' + obj.predicate + ' ' + obj.object + ' ' + graph + '.\n')
           .reduce((prev, curr, _) => prev + curr);
       }
       return inserts;
     },
 
     getDeletes: function(graph) {
-      var deletions = "";
+      var deletions = '';
       if (FBE.Deletions.length !== 0) {
         deletions = FBE.Deletions
-          .map(obj => FBE.checkForAngleBrackets(obj.subject) + ' ' + obj.predicate + ' ' + obj.object + ' ' + graph + '.\n')
+          .map((obj) => FBE.checkForAngleBrackets(obj.subject) + ' ' + obj.predicate + ' ' + obj.object + ' ' + graph + '.\n')
           .reduce((prev, curr, _) => prev + curr);
       }
       return deletions;
     },
 
     checkForAngleBrackets: function(str) {
-      if (str.startsWith("http"))
-        return "<" + str + ">";
+      if (str.startsWith('http'))
+        return '<' + str + '>';
       else
         return str;
     },
@@ -336,19 +336,19 @@
       console.log(tosend);
       $.ajax({
           url: FBE.URL_RHS + hash,
-          method: "POST",
+          method: 'POST',
           data: tosend,
-          contentType: "application/n-quads",
+          contentType: 'application/n-quads',
           cache: false
         })
-        .done(function(data, text, jqxhr) {
-          console.log("Pushed the following to Norms RHS");
+        .done((data) => {
+          console.log('Pushed the following to Norms RHS');
           console.log(data);
           FBE.pingSemanticPingbackService(hash, subject);
         })
-        .fail(function(jqxhr, textStatus, error) {
-          FBE.userfeedback("What the ...?", "Some strange error occured! Please revise your changes and try again", "error", true);
-          console.log(textStatus + " " + error);
+        .fail((jqxhr, textStatus, error) => {
+          FBE.userfeedback('What the ...?', 'Some strange error occured! Please revise your changes and try again', 'error', true);
+          console.log(textStatus + ' ' + error);
           console.log(jqxhr);
         });
     },
@@ -372,7 +372,7 @@
       var ping = {
         source: encodeURI(subject),
         target: encodeURI(FBE.ressourceNamespace + FBE.ressourceName),
-        comment: encodeURI(hash + " at " + (new Date()).toString())
+        comment: encodeURI(hash + ' at ' + (new Date()).toString())
       };
 
       //TODO show rödelndes zeichen
@@ -380,16 +380,16 @@
       $('#feedbackModalSave').prepend(' <i class="fa fa-spinner fa-pulse"></i>');
       $.ajax({
           url: FBE.URL_SPE,
-          method: "POST",
+          method: 'POST',
           data: ping,
           cache: false
         })
-        .done(function(data, text, jqxhr) {
-          FBE.userfeedback("Hell yeah!", "You've done a great Job! We've sent your changes to our Mastermind.", "success", false);
+        .done(() => {
+          FBE.userfeedback('Hell yeah!', 'You have done a great Job! We have sent your changes to our Mastermind.', 'success', false);
         })
-        .fail(function(jqxhr, textStatus, error) {
-          console.log(textStatus + " " + error);
-          FBE.userfeedback("What the ...?", "Some strange error occured! We're sorry, that's our fault.... Please try again later!", "error", true);
+        .fail((jqxhr, textStatus, error) => {
+          console.log(textStatus + ' ' + error);
+          FBE.userfeedback('What the ...?', 'Some strange error occured! We are sorry, that is our fault.... Please try again later!', 'error', true);
         })
         .always(() => {
           $('#feedbackModalSave i').remove();
@@ -402,15 +402,15 @@
       FBE.Deletions = [];
       FBE.Inserts = [];
 
-      var inputs = $("#feedbackEntryList").find("input");
-      var filteredInputs = inputs.toArray().filter(input => input.attributes.readonly === undefined);
+      var inputs = $('#feedbackEntryList').find('input');
+      var filteredInputs = inputs.toArray().filter((input) => input.attributes.readonly === undefined);
 
       if (filteredInputs.length === 0)
         return;
 
       //fill Deletions and Inserts
       var changes = {};
-      filteredInputs.forEach(function(input) {
+      filteredInputs.forEach((input) => {
         if (changes[input.attributes.data_id.value] === undefined) {
           changes[input.attributes.data_id.value] = {
             old: {
@@ -418,37 +418,37 @@
               key: input.attributes.data_id.value,
               saveThis: true
             },
-            new: {
+            newel: {
               subject: FBE.ressourceNamespace + FBE.ressourceName,
               key: input.attributes.data_id.value,
               saveThis: true
             }
           };
         }
-        if (input.name === "predicate") {
+        if (input.name === 'predicate') {
           changes[input.attributes.data_id.value].old.predicate = input.attributes.data_original.value;
-          changes[input.attributes.data_id.value].new.predicate = input.value;
+          changes[input.attributes.data_id.value].newel.predicate = input.value;
         } else {
           changes[input.attributes.data_id.value].old.object = input.attributes.data_original.value;
-          changes[input.attributes.data_id.value].new.object = input.value;
+          changes[input.attributes.data_id.value].newel.object = input.value;
         }
-        if ($(input).hasClass("new")) {
+        if ($(input).hasClass('new')) {
           changes[input.attributes.data_id.value].old.saveThis = false;
         }
-        if ($(input).hasClass("remove")) {
-          changes[input.attributes.data_id.value].new.saveThis = false;
+        if ($(input).hasClass('remove')) {
+          changes[input.attributes.data_id.value].newel.saveThis = false;
         }
       });
 
       //transform map
       for (var key in changes) {
         if (changes[key].old.saveThis === true) FBE.Deletions.push(changes[key].old);
-        if (changes[key].new.saveThis === true) FBE.Inserts.push(changes[key].new);
+        if (changes[key].newel.saveThis === true) FBE.Inserts.push(changes[key].newel);
       }
     },
 
     isEmpty: function(val) {
-      return (val === "" ||
+      return (val === '' ||
         val === {} ||
         val === null ||
         val === undefined ||
@@ -456,7 +456,7 @@
     },
 
     arrowFunctionsAvaiable: function() {
-      var toEval = "function X(){var test = [1,2,3]; test.map(x => x*2);}";
+      var toEval = 'function X(){var test = [1,2,3]; test.map(x => x*2);}';
       try {
         eval(toEval);
         return true;
@@ -467,7 +467,7 @@
   };
 
   //Jquery might not be available, so we're checking this first
-  document.addEventListener("DOMContentLoaded", function(event) {
+  document.addEventListener('DOMContentLoaded', () => {
     if (FBE.arrowFunctionsAvaiable()) {
 
       var waitForJQuery = function() {
@@ -479,21 +479,21 @@
           if (checkJqueryVersion)
             jqueryReady();
           else
-            console.log("Seems you're using a very old JQuery version. We need at least version 1.9.1 or higher!");
+            console.log('Seems you are using a very old JQuery version. We need at least version 1.9.1 or higher!');
         }
       };
 
       if (typeof jQuery === 'undefined') {
-        var script = document.createElement("script");
+        var script = document.createElement('script');
         script.src = 'https://cdnjs.cloudflare.com/ajax/libs/jquery/2.2.0/jquery.min.js';
         script.type = 'text/javascript';
-        document.getElementsByTagName("head")[0].appendChild(script);
+        document.getElementsByTagName('head')[0].appendChild(script);
       }
 
       //Start Polling
       waitForJQuery();
     } else {
-      console.log("Hey there... seems that your're using a very old browser or at least a browser that isn't supporting features that we need. I'm sorry, but we disabled the feedback feature. Please use another browser!");
+      console.log('Hey there... seems that your are using a very old browser or at least a browser that isn not supporting features that we need. I am sorry, but we disabled the feedback feature. Please use another browser!');
     }
   });
 
