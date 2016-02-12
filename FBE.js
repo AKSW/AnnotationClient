@@ -172,7 +172,7 @@
     },
 
     getTriples: function(toInsert) {
-      var jsonURL = FBE.extractJsonUrl();
+      var jsonURL = $('link[rel="alternate"][type="application/json"]').attr('href');
       var resourceURL = FBE.extractResourceUrl();
       if (FBE.isEmpty(jsonURL) || FBE.isEmpty(resourceURL)) {
         $('#feddbackEditResources').addClass('disabled').prop('disabled', true);
@@ -184,22 +184,25 @@
         jsonURL = 'Taucha.json';
         //resourceURL = 'http://de.dbpedia.org/resource/Taucha';
       }
-
-      $.get(jsonURL)
-        .done((data) => {
-          FBE.parseAndUseNewTriples(data, toInsert, resourceURL);
-        })
-        .fail((jqxhr, textStatus, error) => {
-          FBE.userfeedback('What the ...?', 'Something went terribly wrong! I am sorry, but you can not send us feedback...', 'error', false);
-          console.log(textStatus + ' ' + error);
-        });
-    },
-
-    extractJsonUrl: function() {
-      var url = $('link[rel="alternate"][type="application/json"]').attr('href');
-      if (FBE.isEmpty(url)) { //TODO No json data available
+      if (!FBE.isEmpty(jsonURL)) {
+        $.get(jsonURL)
+          .done((data) => {
+            FBE.parseAndUseNewTriples(data, toInsert, resourceURL);
+          })
+          .fail((jqxhr, textStatus, error) => {
+            FBE.userfeedback('What the ...?', 'Something went terribly wrong! I am sorry, but you can not send us feedback...', 'error', false);
+            console.log(textStatus + ' ' + error);
+          });
+      } else {
+        $.getJSON(resourceURL)
+          .done((data) => {
+            FBE.parseAndUseNewTriples(data, toInsert, resourceURL);
+          })
+          .fail((jqxhr, textStatus, error) => {
+            FBE.userfeedback('What the ...?', 'Something went terribly wrong! I am sorry, but you can not send us feedback...', 'error', false);
+            console.log(textStatus + ' ' + error);
+          });
       }
-      return url;
     },
 
     extractResourceUrl: function() {
