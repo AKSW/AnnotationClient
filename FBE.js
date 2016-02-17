@@ -199,7 +199,7 @@
         $.ajax({
             url: resourceURL,
             method: 'GET',
-            accepts: 'application/rdf+json;q=1.0, application/json;q=0.8',
+            headers: {Accept: 'application/rdf+json;q=1.0, application/json;q=0.8'},
             cache: false
           })
           .done((data) => {
