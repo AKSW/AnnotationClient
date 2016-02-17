@@ -9,7 +9,7 @@
   "bugs": "https://github.com/AKSW/AnnotationClient/issues",
   "author": "Roy Meissner (https://rmeissn.github.io/)",
   "license": "GPL-3.0",
-  "main": "",
+  "main": "server.js",
   "scripts": {
     "build": "npm run minify:js && npm run minify:css",
     "clean": "rm -R ./node_modules/",

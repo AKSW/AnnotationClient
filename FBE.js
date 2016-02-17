@@ -172,11 +172,12 @@
     },
 
     getTriples: function(toInsert) {
-      var jsonURL = $('link[rel="alternate"][type="application/json"]').attr('href');
+      var jsonURL = $('link[rel="alternate"][type="application/rdf+json"]').attr('href');
+      if(FBE.isEmpty(jsonURL))
+        jsonURL = $('link[rel="alternate"][type="application/json"]').attr('href');
       var resourceURL = FBE.extractResourceUrl();
-      if (FBE.isEmpty(jsonURL) || FBE.isEmpty(resourceURL)) {
-        $('#feddbackEditResources').addClass('disabled').prop('disabled', true);
-        $('#feddbackEditResources').after('<i class="help-block">We are sorry but there are no editable resources on this page.</i>');
+      if (FBE.isEmpty(resourceURL)) {
+        deactivateEditButton();
         return;
       }
       //Test Environment Workaround
@@ -191,18 +192,30 @@
           })
           .fail((jqxhr, textStatus, error) => {
             FBE.userfeedback('What the ...?', 'Something went terribly wrong! I am sorry, but you can not send us feedback...', 'error', false);
+            deactivateEditButton();
             console.log(textStatus + ' ' + error);
           });
       } else {
-        $.getJSON(resourceURL)
+        $.ajax({
+            url: resourceURL,
+            method: 'GET',
+            accepts: 'application/rdf+json;q=1.0, application/json;q=0.8',
+            cache: false
+          })
           .done((data) => {
             FBE.parseAndUseNewTriples(data, toInsert, resourceURL);
           })
           .fail((jqxhr, textStatus, error) => {
             FBE.userfeedback('What the ...?', 'Something went terribly wrong! I am sorry, but you can not send us feedback...', 'error', false);
+            deactivateEditButton();
             console.log(textStatus + ' ' + error);
           });
       }
+    },
+
+    deactivateEditButton: function() {
+      $('#feddbackEditResources').addClass('disabled').prop('disabled', true);
+      $('#feddbackEditResources').after('<i class="help-block">We are sorry but there are no editable resources on this page.</i>');
     },
 
     extractResourceUrl: function() {
