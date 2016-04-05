@@ -5,10 +5,10 @@
     listEntry: function(id, subject, predicate, object) {
       var html = '<div id="feedbackListEntry' + id + '" data-id="' + id + '">' +
         ' <div class="form-group">' +
-        '   <input type="text" class="form-control" name="predicate" data_id="' + id + '" data_original="' + predicate + '" value="' + predicate + '" readonly size="37>' +
+        '   <input type="text" class="form-control" name="predicate" data_id="' + id + '" data_original="' + predicate + '" value="' + predicate + '" size="37" readonly>' +
         ' </div>' +
         ' <div class="form-group">' +
-        '   <textarea type="text" class="form-control" name="object" data_id="' + id + '" data_original="' + object.replace('"', '&quot;') + '" readonly size="50">'+object+'</textarea>' +
+        '   <textarea type="text" class="form-control" name="object" data_id="' + id + '" cols="48" readonly data_original="' + object.replace('"', '&quot;').replace('<', '&#x3c;').replace('>', '&#x3e;') + '" >'+object+'</textarea>' +
         ' </div>' +
         ' <button class="btn btn-info feedbackEdit"><i class="fa fa-edit"></i></button>' +
         ' <button class="btn btn-danger feedbackRemove"><i class="fa fa-remove"></i></button>' +
@@ -305,41 +305,47 @@
     createCommit: function(hash) {
       var plainSubject = FBE.URL_RHS + hash + '-patch';
       var subject = '<' + plainSubject + '>';
-      var revision = '<' + FBE.URL_RHS + hash + '-revision>';
-      var delGraph = '<' + FBE.URL_RHS + hash + '-delete>';
-      var insGraph = '<' + FBE.URL_RHS + hash + '-insert>';
 
-      var deletes = FBE.getDeletes(delGraph);
-      var inserts = FBE.getInserts(insGraph);
-      var nquads = subject + ' <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://vocab.eccenca.com/revision/Commit> .\n' +
+      var deletes = FBE.getDeletes();
+      var inserts = FBE.getInserts();
+      var nquads = subject + ' <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://purl.org/vocab/changeset/schema#ChangeSet> .\n' +
         subject + ' <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://rdfs.org/sioc/ns#Item> .\n' +
-        subject + ' <http://xmlns.com/foaf/maker> <' + $('#feedbackFormAuthor').val() + '> .\n' +
-        subject + ' <https://vocab.eccenca.com/revision/commitMessage> "' + $('#feedbackFormMessage').val() + '" .\n' +
-        subject + ' <http://www.w3.org/ns/prov#atTime> "' + new Date().toISOString() + '"^^<http://www.w3.org/2001/XMLSchema#dateTime> .\n' +
         subject + ' <http://rdfs.org/sioc/ns#reply_of> <' + FBE.ressourceNamespace + FBE.ressourceName + '> .\n' +
+        subject + ' <http://purl.org/vocab/changeset/schema#subjectOfChange> <' + FBE.ressourceNamespace + FBE.ressourceName + '> .\n' +
+        subject + ' <http://xmlns.com/foaf/maker> <' + $('#feedbackFormAuthor').val() + '> .\n' +
+        subject + ' <http://purl.org/vocab/changeset/schema#creatorName> <' + $('#feedbackFormAuthor').val() + '> .\n' +
+        subject + ' <http://www.w3.org/ns/prov#atTime> "' + new Date().toISOString() + '"^^<http://www.w3.org/2001/XMLSchema#dateTime> .\n' +
+        subject + ' <http://rdfs.org/sioc/ns#created_at> "' + new Date().toISOString() + '"^^<http://www.w3.org/2001/XMLSchema#dateTime> .\n' +
+        subject + ' <http://purl.org/vocab/changeset/schema#createdDate> "' + new Date().toISOString() + '"^^<http://www.w3.org/2001/XMLSchema#dateTime> .\n' +
+        subject + ' <http://purl.org/vocab/changeset/schema#changeReason> "' + $('#feedbackFormMessage').val() + '" .\n' +
+        subject + ' <http://purl.org/vocab/changeset/schema#addition> _:addition .\n' +
+        subject + ' <http://purl.org/vocab/changeset/schema#removal> _:removal .\n';
+
+        /*
         subject + ' <https://vocab.eccenca.com/revision/hasRevision> ' + revision + ' .\n' +
         revision + ' <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://vocab.eccenca.com/revision/Revision> .\n' +
-        revision + ' <https://vocab.eccenca.com/revision/deltaDelete> ' + delGraph + ' .\n' +
-        revision + ' <https://vocab.eccenca.com/revision/deltaInsert> ' + insGraph + ' .\n';
+        */
 
-      FBE.sendFeedback(nquads + deletes + inserts, hash, plainSubject);
+      FBE.sendFeedback(nquads + deletes +inserts, hash, plainSubject);
     },
 
-    getInserts: function(graph) {
+    getInserts: function() {
       var inserts = '';
       if (FBE.Inserts.length !== 0) {
+        console.log('Inserts: ', FBE.Inserts);
         inserts = FBE.Inserts
-          .map((obj) => FBE.checkForAngleBrackets(obj.subject) + ' ' + obj.predicate + ' ' + obj.object + ' ' + graph + '.\n')
+          .map((obj) => '_:addition ' + obj.predicate + ' ' + obj.object + ' .\n')
           .reduce((prev, curr, _) => prev + curr);
       }
       return inserts;
     },
 
-    getDeletes: function(graph) {
+    getDeletes: function() {
       var deletions = '';
       if (FBE.Deletions.length !== 0) {
+        console.log('Deletions: ', FBE.Deletions);
         deletions = FBE.Deletions
-          .map((obj) => FBE.checkForAngleBrackets(obj.subject) + ' ' + obj.predicate + ' ' + obj.object + ' ' + graph + '.\n')
+          .map((obj) => '_:removal ' + obj.predicate + ' ' + obj.object + ' ' + ' .\n')
           .reduce((prev, curr, _) => prev + curr);
       }
       return deletions;
@@ -425,8 +431,11 @@
 
       var inputs = $('#feedbackEntryList').find('input').toArray();
       const textareas = $('#feedbackEntryList').find('textarea').toArray();
+      console.log('inputs: ', inputs);
+      console.log('textareas: ', textareas);
       textareas.forEach((i) => inputs.push(i));
       var filteredInputs = inputs.filter((input) => input.attributes.readonly === undefined);
+      console.log('filtered inputs: ', filteredInputs);
 
       if (filteredInputs.length === 0)
         return;
@@ -434,6 +443,7 @@
       //fill Deletions and Inserts
       var changes = {};
       filteredInputs.forEach((input) => {
+        console.log('input with name ', input.name, input);
         if (changes[input.attributes.data_id.value] === undefined) {
           changes[input.attributes.data_id.value] = {
             old: {
@@ -468,6 +478,8 @@
         if (changes[key].old.saveThis === true) FBE.Deletions.push(changes[key].old);
         if (changes[key].newel.saveThis === true) FBE.Inserts.push(changes[key].newel);
       }
+
+      console.log('made from changes ', changes, ' that: ', FBE.Deletions, FBE.Inserts);
     },
 
     isEmpty: function(val) {
