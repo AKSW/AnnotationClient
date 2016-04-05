@@ -8,7 +8,7 @@
         '   <input type="text" class="form-control" name="predicate" data_id="' + id + '" data_original="' + predicate + '" value="' + predicate + '" readonly size="37>' +
         ' </div>' +
         ' <div class="form-group">' +
-        '   <input type="text" class="form-control" name="object" data_id="' + id + '" data_original="' + object.replace('"', '&quot;') + '" value="' + object.replace('"', '&quot;') + '" readonly size="50">' +
+        '   <textarea type="text" class="form-control" name="object" data_id="' + id + '" data_original="' + object.replace('"', '&quot;') + '" readonly size="50">'+object+'</textarea>' +
         ' </div>' +
         ' <button class="btn btn-info feedbackEdit"><i class="fa fa-edit"></i></button>' +
         ' <button class="btn btn-danger feedbackRemove"><i class="fa fa-remove"></i></button>' +
@@ -100,6 +100,7 @@
       event.preventDefault();
       var id = $(event.target).closest('div').attr('id');
       $('#' + id + ' > div > input').prop('readonly', false);
+      $('#' + id + ' > div > textarea').prop('readonly', false);
       $('#' + id).find('.feedbackEdit').hide();
     },
 
@@ -108,6 +109,8 @@
       var id = $(event.target).closest('div').attr('id');
       $('#' + id + ' > div > input').prop('readonly', false);
       $('#' + id + ' > div > input').addClass('remove');
+      $('#' + id + ' > div > textarea').prop('readonly', false);
+      $('#' + id + ' > div > textarea').addClass('remove');
       $('#' + id).hide();
       $('#' + id).next().hide();
     },
@@ -173,7 +176,7 @@
 
     getTriples: function(toInsert) {
       var jsonURL = $('link[rel="alternate"][type="application/rdf+json"]').attr('href');
-      if(FBE.isEmpty(jsonURL))
+      if (FBE.isEmpty(jsonURL))
         jsonURL = $('link[rel="alternate"][type="application/json"]').attr('href');
       var resourceURL = FBE.extractResourceUrl();
       if (FBE.isEmpty(resourceURL)) {
@@ -199,7 +202,9 @@
         $.ajax({
             url: resourceURL,
             method: 'GET',
-            headers: {Accept: 'application/rdf+json;q=1.0, application/json;q=0.8'},
+            headers: {
+              Accept: 'application/rdf+json;q=1.0, application/json;q=0.8'
+            },
             cache: false
           })
           .done((data) => {
@@ -489,6 +494,7 @@
       var waitForJQuery = function() {
         if (typeof jQuery === 'undefined')
           window.setTimeout(() => {
+            console.warn('waitForJQuery');
             waitForJQuery();
           }, 100);
         else {
