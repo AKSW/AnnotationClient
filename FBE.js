@@ -423,8 +423,10 @@
       FBE.Deletions = [];
       FBE.Inserts = [];
 
-      var inputs = $('#feedbackEntryList').find('input');
-      var filteredInputs = inputs.toArray().filter((input) => input.attributes.readonly === undefined);
+      var inputs = $('#feedbackEntryList').find('input').toArray();
+      const textareas = $('#feedbackEntryList').find('textarea').toArray();
+      textareas.forEach((i) => inputs.push(i));
+      var filteredInputs = inputs.filter((input) => input.attributes.readonly === undefined);
 
       if (filteredInputs.length === 0)
         return;
