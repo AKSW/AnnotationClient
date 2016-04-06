@@ -292,7 +292,7 @@
     createComment: function(hash) {
       var plainSubject = FBE.URL_RHS + hash + '-resource';
       var subject = '<' + plainSubject + '>';
-      var nquads = subject + ' <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://rdfs.org/sioc/ns#Post> .\n' +
+      var nquads = //subject + ' <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://rdfs.org/sioc/ns#Post> .\n' +
         subject + ' <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://rdfs.org/sioc/types#Comment> .\n' +
         subject + ' <http://rdfs.org/sioc/ns#reply_of> <' + FBE.ressourceNamespace + FBE.ressourceName + '> .\n' +
         subject + ' <http://xmlns.com/foaf/maker> <' + $('#feedbackFormAuthor').val() + '> .\n' +
