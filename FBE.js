@@ -317,9 +317,11 @@
         subject + ' <http://www.w3.org/ns/prov#atTime> "' + new Date().toISOString() + '"^^<http://www.w3.org/2001/XMLSchema#dateTime> .\n' +
         subject + ' <http://rdfs.org/sioc/ns#created_at> "' + new Date().toISOString() + '"^^<http://www.w3.org/2001/XMLSchema#dateTime> .\n' +
         subject + ' <http://purl.org/vocab/changeset/schema#createdDate> "' + new Date().toISOString() + '"^^<http://www.w3.org/2001/XMLSchema#dateTime> .\n' +
-        subject + ' <http://purl.org/vocab/changeset/schema#changeReason> "' + $('#feedbackFormMessage').val() + '" .\n' +
-        subject + ' <http://purl.org/vocab/changeset/schema#addition> _:addition .\n' +
-        subject + ' <http://purl.org/vocab/changeset/schema#removal> _:removal .\n';
+        subject + ' <http://purl.org/vocab/changeset/schema#changeReason> "' + $('#feedbackFormMessage').val() + '" .\n';
+        if (inserts !== '')
+          nquads += subject + ' <http://purl.org/vocab/changeset/schema#addition> _:addition .\n';
+        if (deletes !== '')
+          nquads += subject + ' <http://purl.org/vocab/changeset/schema#removal> _:removal .\n';
 
         /*
         subject + ' <https://vocab.eccenca.com/revision/hasRevision> ' + revision + ' .\n' +
