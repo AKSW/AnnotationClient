@@ -8,7 +8,7 @@
         '   <input type="text" class="form-control" name="predicate" data_id="' + id + '" data_original="' + predicate + '" value="' + predicate + '" size="37" readonly>' +
         ' </div>' +
         ' <div class="form-group">' +
-        '   <textarea type="text" class="form-control" name="object" data_id="' + id + '" cols="48" readonly data_original="' + object.replace('"', '&quot;').replace('<', '&#x3c;').replace('>', '&#x3e;') + '" >'+object+'</textarea>' +
+        '   <textarea type="text" class="form-control" name="object" data_id="' + id + '" cols="48" readonly>' + object + '</textarea>' +
         ' </div>' +
         ' <button class="btn btn-info feedbackEdit"><i class="fa fa-edit"></i></button>' +
         ' <button class="btn btn-danger feedbackRemove"><i class="fa fa-remove"></i></button>' +
@@ -133,6 +133,7 @@
     Inserts: [], //Array like : [{subject, predicate, object, key}]
     URL_RHS: '', // RHS ^= Resource Hosting Service
     URL_SPE: '', //SPE ^= Semantic Pingback Endpoint
+    object_objects: {}, //keys are data_id and values are data_original
 
     addFeedbackButton: function() {
       $('body').append('<button id="feedbackButton" type="button" class="">Give Feedback</button>');
@@ -238,6 +239,7 @@
 
       //var firstKey = Object.keys(data)[0];
       var triples = data[firstKey];
+      console.log('triples: ', triples);
 
       //update namespace and name
       var namespaceParts = firstKey.split('/');
@@ -254,7 +256,7 @@
         var value = triples[key];
 
         listEntries = value.map((element, i) => {
-            var obj = element.value;
+            let obj = element.value;
 
             switch (element.type) {
               case 'uri':
@@ -262,7 +264,8 @@
                 break;
 
               case 'literal':
-                obj = '&quot;' + obj + '&quot;';
+                if (!(obj.startsWith('"') && obj.endsWith('"')))
+                  obj = '\"' + obj + '\"';
 
                 if (element.datatype)
                   obj = obj + '^^' + FBE.checkForAngleBrackets(element.datatype);
@@ -270,6 +273,8 @@
                   obj = obj + '@' + element.lang;
                 break;
             }
+
+            FBE.object_objects[i + counter] = obj;
 
             return FBE_Factory.listEntry(i + counter,
               firstKey,
@@ -318,17 +323,17 @@
         subject + ' <http://rdfs.org/sioc/ns#created_at> "' + new Date().toISOString() + '"^^<http://www.w3.org/2001/XMLSchema#dateTime> .\n' +
         subject + ' <http://purl.org/vocab/changeset/schema#createdDate> "' + new Date().toISOString() + '"^^<http://www.w3.org/2001/XMLSchema#dateTime> .\n' +
         subject + ' <http://purl.org/vocab/changeset/schema#changeReason> "' + $('#feedbackFormMessage').val() + '" .\n';
-        if (inserts !== '')
-          nquads += subject + ' <http://purl.org/vocab/changeset/schema#addition> _:addition .\n';
-        if (deletes !== '')
-          nquads += subject + ' <http://purl.org/vocab/changeset/schema#removal> _:removal .\n';
+      if (inserts !== '')
+        nquads += subject + ' <http://purl.org/vocab/changeset/schema#addition> _:addition .\n';
+      if (deletes !== '')
+        nquads += subject + ' <http://purl.org/vocab/changeset/schema#removal> _:removal .\n';
 
-        /*
-        subject + ' <https://vocab.eccenca.com/revision/hasRevision> ' + revision + ' .\n' +
-        revision + ' <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://vocab.eccenca.com/revision/Revision> .\n' +
-        */
+      /*
+      subject + ' <https://vocab.eccenca.com/revision/hasRevision> ' + revision + ' .\n' +
+      revision + ' <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://vocab.eccenca.com/revision/Revision> .\n' +
+      */
 
-      FBE.sendFeedback(nquads + deletes +inserts, hash, plainSubject);
+      FBE.sendFeedback(nquads + deletes + inserts, hash, plainSubject);
     },
 
     getInserts: function() {
@@ -442,6 +447,8 @@
       if (filteredInputs.length === 0)
         return;
 
+      console.log('We have the object array ', FBE.object_objects);
+
       //fill Deletions and Inserts
       var changes = {};
       filteredInputs.forEach((input) => {
@@ -464,7 +471,25 @@
           changes[input.attributes.data_id.value].old.predicate = input.attributes.data_original.value;
           changes[input.attributes.data_id.value].newel.predicate = input.value;
         } else {
-          changes[input.attributes.data_id.value].old.object = input.attributes.data_original.value;
+          let objXXXXXXXXX = FBE.object_objects[input.attributes.data_id.value];
+
+          console.log('origin object ', objXXXXXXXXX);
+          console.log('startsWith " ', objXXXXXXXXX.startsWith('"'));
+          console.log('endsWith " ', objXXXXXXXXX.endsWith('"'));
+
+          //TODO unescape first and last "
+          if (objXXXXXXXXX.startsWith('"') && objXXXXXXXXX.endsWith('"')) {
+            console.log('literal');
+            const temp = objXXXXXXXXX.substr(1, objXXXXXXXXX.length - 2);
+            objXXXXXXXXX = '"' + temp.replace(/"/g, "\\\"") + '"';
+            console.log('from data value ', FBE.object_objects[input.attributes.data_id.value], ' to ', objXXXXXXXXX);
+          } else if (objXXXXXXXXX.contains('"^^<')) {
+            console.log('literal with datatype');
+            const temp = objXXXXXXXXX.substr(1, objXXXXXXXXX.indexOf('"^^<') - 1);
+            objXXXXXXXXX = '"' + temp.replace(/"/g, "\\\"") + objXXXXXXXXX.substr(objXXXXXXXXX.indexOf('"^^<'));
+            console.log('from data value ', FBE.object_objects[input.attributes.data_id.value], ' to ', objXXXXXXXXX);
+          }
+          changes[input.attributes.data_id.value].old.object = objXXXXXXXXX;
           changes[input.attributes.data_id.value].newel.object = input.value;
         }
         if ($(input).hasClass('new')) {
@@ -547,16 +572,16 @@
   function jqueryReady() {
     // now we can use JQuery
     //TODO validate for success
-    /*var styles = //'<link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">' +
-      '<link rel="stylesheet" type="text/css" href="prefixed_bootstrap.css">' +
+    /*var styles = '<link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">' +
+      //'<link rel="stylesheet" type="text/css" href="prefixed_bootstrap.css">' +
       '<link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">' +
       '<link rel="stylesheet" type="text/css" href="https://cdn.rawgit.com/lipis/bootstrap-sweetalert/master/lib/sweet-alert.css">';
     $('head').append(styles);
-    //$.getScript("https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js");
-    $.getScript("bootstrap.js");
+    $.getScript("https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js");
+    //$.getScript("bootstrap.js");
     //$.get("./custom_bootstrap.min.js");
     $.getScript("http://point-at-infinity.org/jssha256/jssha256.js");
-    $.getScript("https://cdn.rawgit.com/lipis/bootstrap-sweetalert/master/lib/sweet-alert.min.js");*/
+    $.getScript("https://cdn.rawgit.com/lipis/bootstrap-sweetalert/master/lib/sweet-alert.min.js"); //*/
     $('head').after('<style> #feedbackButton { position: fixed; bottom: 30px; right: 30px; z-index: 1; width: 80px; height: 80px; font-size: 1em; color: #fff; background: #2C98DE; border: none; border-radius: 50%; box-shadow: 0 3px 6px rgba(0,0,0,.275); outline: none; margin: auto;}</style>');
     FBE.addFeedbackButton();
   }
