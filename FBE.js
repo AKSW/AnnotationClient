@@ -2,13 +2,13 @@
   'use strict';
 
   var FBE_Factory = {
-    listEntry: function(id, subject, predicate, object) {
+    listEntry: function(id, subject, predicate, object, type) {
       var html = '<div id="feedbackListEntry' + id + '" data-id="' + id + '">' +
         ' <div class="form-group">' +
         '   <input type="text" class="form-control" name="predicate" data_id="' + id + '" data_original="' + predicate + '" value="' + predicate + '" size="37" readonly>' +
         ' </div>' +
         ' <div class="form-group">' +
-        '   <textarea type="text" class="form-control" name="object" data_id="' + id + '" cols="48" readonly>' + object + '</textarea>' +
+        '   <textarea type="text" class="form-control" name="object" data_id="' + id + '" data_type="' + type + '" cols="48" readonly>' + object + '</textarea>' +
         ' </div>' +
         ' <button class="btn btn-info feedbackEdit"><i class="fa fa-edit"></i></button>' +
         ' <button class="btn btn-danger feedbackRemove"><i class="fa fa-remove"></i></button>' +
@@ -18,7 +18,7 @@
     },
 
     listEntryFromRDF: function(i, element) {
-      return FBE_Factory.listEntry(i, element.subject, element.predicate, element.object);
+      return FBE_Factory.listEntry(i, element.subject, element.predicate, element.object, element.datatype);
     },
 
     getModal: function() {
@@ -118,7 +118,7 @@
     addTriple: function(event) {
       event.preventDefault();
       var id = parseInt($('#feedbackEntryList > div:last').attr('data_id')) + 1;
-      var entry = FBE_Factory.listEntry(id, 'namespace', '', '') + '<br>';
+      var entry = FBE_Factory.listEntry(id, 'namespace', '', '', '') + '<br>';
       $('#feedbackEntryList').find('.feedbackAdd').before(entry);
       $('#feedbackEntryList #feedbackListEntry' + id + ' > button.feedbackEdit').click();
       $('#feedbackEntryList #feedbackListEntry' + id + ' input').addClass('new');
@@ -279,7 +279,8 @@
             return FBE_Factory.listEntry(i + counter,
               firstKey,
               FBE.checkForAngleBrackets(key),
-              obj) + '<br>';
+              obj,
+              element.type) + '<br>';
           })
           .reduce((prev, curr) => prev + curr, listEntries);
 
@@ -471,26 +472,17 @@
           changes[input.attributes.data_id.value].old.predicate = input.attributes.data_original.value;
           changes[input.attributes.data_id.value].newel.predicate = input.value;
         } else {
-          let objXXXXXXXXX = FBE.object_objects[input.attributes.data_id.value];
+          //handle old value
+          let old_object = FBE.object_objects[input.attributes.data_id.value];
+          if (input.attributes.data_type.value === 'literal')
+            old_object = FBE.transformLiteral(old_object);
+          changes[input.attributes.data_id.value].old.object = old_object;
 
-          console.log('origin object ', objXXXXXXXXX);
-          console.log('startsWith " ', objXXXXXXXXX.startsWith('"'));
-          console.log('endsWith " ', objXXXXXXXXX.endsWith('"'));
-
-          //TODO unescape first and last "
-          if (objXXXXXXXXX.startsWith('"') && objXXXXXXXXX.endsWith('"')) {
-            console.log('literal');
-            const temp = objXXXXXXXXX.substr(1, objXXXXXXXXX.length - 2);
-            objXXXXXXXXX = '"' + temp.replace(/"/g, "\\\"") + '"';
-            console.log('from data value ', FBE.object_objects[input.attributes.data_id.value], ' to ', objXXXXXXXXX);
-          } else if (objXXXXXXXXX.contains('"^^<')) {
-            console.log('literal with datatype');
-            const temp = objXXXXXXXXX.substr(1, objXXXXXXXXX.indexOf('"^^<') - 1);
-            objXXXXXXXXX = '"' + temp.replace(/"/g, "\\\"") + objXXXXXXXXX.substr(objXXXXXXXXX.indexOf('"^^<'));
-            console.log('from data value ', FBE.object_objects[input.attributes.data_id.value], ' to ', objXXXXXXXXX);
-          }
-          changes[input.attributes.data_id.value].old.object = objXXXXXXXXX;
-          changes[input.attributes.data_id.value].newel.object = input.value;
+          //handle new valuebjects[input.attributes.data_id.value];
+          let new_object = input.value;
+          if (input.attributes.data_type.value === 'literal')
+            new_object = FBE.transformLiteral(new_object);
+          changes[input.attributes.data_id.value].newel.object = new_object;
         }
         if ($(input).hasClass('new')) {
           changes[input.attributes.data_id.value].old.saveThis = false;
@@ -507,6 +499,26 @@
       }
 
       console.log('made from changes ', changes, ' that: ', FBE.Deletions, FBE.Inserts);
+    },
+
+    //prepares literal for rdf prepresentation
+    transformLiteral: function(literal) {
+      //escape relevant "
+      if (literal.startsWith('"') && literal.endsWith('"')) {
+        console.log('literal');
+        const temp = literal.substr(1, literal.length - 2);
+        literal = '"' + temp.replace(/"/g, "\\\"") + '"';
+        //escape line breaks
+        literal = literal.replace(/(\r\n|\n|\r)/gm, '\\n');
+      } else if (literal.contains('"^^<')) {
+        console.log('literal with datatype');
+        let temp = literal.substr(1, literal.indexOf('"^^<') - 1);
+        //escape line breaks
+        temp = temp.replace(/(\r\n|\n|\r)/gm, '\\n');
+        literal = '"' + temp.replace(/"/g, "\\\"") + literal.substr(literal.indexOf('"^^<'));
+      }
+
+      return literal;
     },
 
     isEmpty: function(val) {
