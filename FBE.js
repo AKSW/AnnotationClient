@@ -256,7 +256,7 @@
         var value = triples[key];
 
         listEntries = value.map((element, i) => {
-            let obj = element.value;
+            var obj = element.value;
 
             switch (element.type) {
               case 'uri':
@@ -480,13 +480,13 @@
           changes[input.attributes.data_id.value].newel.predicate = input.value;
         } else {
           //handle old value
-          let old_object = FBE.object_objects[input.attributes.data_id.value];
+          var old_object = FBE.object_objects[input.attributes.data_id.value];
           if (input.attributes.data_type.value === 'literal')
             old_object = FBE.transformLiteral(old_object);
           changes[input.attributes.data_id.value].old.object = old_object;
 
           //handle new valuebjects[input.attributes.data_id.value];
-          let new_object = input.value;
+          var new_object = input.value;
           if (input.attributes.data_type.value === 'literal')
             new_object = FBE.transformLiteral(new_object);
           changes[input.attributes.data_id.value].newel.object = new_object;
@@ -519,7 +519,7 @@
         literal = literal.replace(/(\r\n|\n|\r)/gm, '\\n');
       } else if (literal.contains('"^^<')) {
         console.log('literal with datatype');
-        let temp = literal.substr(1, literal.indexOf('"^^<') - 1);
+        var temp = literal.substr(1, literal.indexOf('"^^<') - 1);
         //escape line breaks
         temp = temp.replace(/(\r\n|\n|\r)/gm, '\\n');
         literal = '"' + temp.replace(/"/g, "\\\"") + literal.substr(literal.indexOf('"^^<'));
