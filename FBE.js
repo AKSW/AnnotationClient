@@ -312,8 +312,8 @@
       var plainSubject = FBE.URL_RHS + hash + '-patch';
       var subject = '<' + plainSubject + '>';
 
-      var deletes = FBE.getDeletes();
-      var inserts = FBE.getInserts();
+      var deletes = FBE.getDeletes(subject, '<' + FBE.ressourceNamespace + FBE.ressourceName + '>');
+      var inserts = FBE.getInserts(subject, '<' + FBE.ressourceNamespace + FBE.ressourceName + '>');
       var nquads = subject + ' <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://purl.org/vocab/changeset/schema#ChangeSet> .\n' +
         subject + ' <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://rdfs.org/sioc/ns#Item> .\n' +
         subject + ' <http://rdfs.org/sioc/ns#reply_of> <' + FBE.ressourceNamespace + FBE.ressourceName + '> .\n' +
@@ -324,39 +324,46 @@
         subject + ' <http://rdfs.org/sioc/ns#created_at> "' + new Date().toISOString() + '"^^<http://www.w3.org/2001/XMLSchema#dateTime> .\n' +
         subject + ' <http://purl.org/vocab/changeset/schema#createdDate> "' + new Date().toISOString() + '"^^<http://www.w3.org/2001/XMLSchema#dateTime> .\n' +
         subject + ' <http://purl.org/vocab/changeset/schema#changeReason> "' + $('#feedbackFormMessage').val() + '" .\n';
-      if (inserts !== '')
-        nquads += subject + ' <http://purl.org/vocab/changeset/schema#addition> _:addition .\n';
-      if (deletes !== '')
-        nquads += subject + ' <http://purl.org/vocab/changeset/schema#removal> _:removal .\n';
-
-      /*
-      subject + ' <https://vocab.eccenca.com/revision/hasRevision> ' + revision + ' .\n' +
-      revision + ' <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://vocab.eccenca.com/revision/Revision> .\n' +
-      */
 
       FBE.sendFeedback(nquads + deletes + inserts, hash, plainSubject);
     },
 
-    getInserts: function() {
+    getInserts: function(baseGraph, baseRessource) {
       var inserts = '';
+      var graphExtensions = '';
+      var counter = 1;
       if (FBE.Inserts.length !== 0) {
         console.log('Inserts: ', FBE.Inserts);
-        inserts = FBE.Inserts
-          .map((obj) => '_:addition ' + obj.predicate + ' ' + obj.object + ' .\n')
-          .reduce((prev, curr, _) => prev + curr);
+
+        FBE.Inserts.forEach((element) => {
+          graphExtensions += baseGraph + ' <http://purl.org/vocab/changeset/schema#addition> _:addition'+counter+' .\n';
+          inserts += '_:addition'+counter+ ' <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/1999/02/22-rdf-syntax-ns#Statement> .\n';
+          inserts += '_:addition'+counter+ ' <http://www.w3.org/1999/02/22-rdf-syntax-ns#subject> ' + baseRessource + ' .\n';
+          inserts += '_:addition'+counter+ ' <http://www.w3.org/1999/02/22-rdf-syntax-ns#predicate> ' + element.predicate + ' .\n';
+          inserts += '_:addition'+counter+ ' <http://www.w3.org/1999/02/22-rdf-syntax-ns#object> ' + element.object + ' .\n';
+          counter++;
+        });
       }
-      return inserts;
+      return graphExtensions + inserts;
     },
 
-    getDeletes: function() {
+    getDeletes: function(baseGraph, baseRessource) {
       var deletions = '';
+      var graphExtensions = '';
+      var counter = 1;
       if (FBE.Deletions.length !== 0) {
         console.log('Deletions: ', FBE.Deletions);
-        deletions = FBE.Deletions
-          .map((obj) => '_:removal ' + obj.predicate + ' ' + obj.object + ' ' + ' .\n')
-          .reduce((prev, curr, _) => prev + curr);
+
+        FBE.Deletions.forEach((element) => {
+          graphExtensions += baseGraph + ' <http://purl.org/vocab/changeset/schema#removal> _:removal'+counter+' .\n';
+          deletions += '_:removal'+counter+ ' <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/1999/02/22-rdf-syntax-ns#Statement> .\n';
+          deletions += '_:removal'+counter+ ' <http://www.w3.org/1999/02/22-rdf-syntax-ns#subject> ' + baseRessource + ' .\n';
+          deletions += '_:removal'+counter+ ' <http://www.w3.org/1999/02/22-rdf-syntax-ns#predicate> ' + element.predicate + ' .\n';
+          deletions += '_:removal'+counter+ ' <http://www.w3.org/1999/02/22-rdf-syntax-ns#object> ' + element.object + ' .\n';
+          counter++;
+        });
       }
-      return deletions;
+      return graphExtensions + deletions;
     },
 
     checkForAngleBrackets: function(str) {
@@ -584,7 +591,7 @@
   function jqueryReady() {
     // now we can use JQuery
     //TODO validate for success
-    /*var styles = '<link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">' +
+    var styles = '<link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">' +
       //'<link rel="stylesheet" type="text/css" href="prefixed_bootstrap.css">' +
       '<link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">' +
       '<link rel="stylesheet" type="text/css" href="https://cdn.rawgit.com/lipis/bootstrap-sweetalert/master/lib/sweet-alert.css">';
