@@ -177,17 +177,13 @@
 
     getTriples: function(toInsert) {
       var jsonURL = $('link[rel="alternate"][type="application/rdf+json"]').attr('href');
+      console.log(jsonURL);
       if (FBE.isEmpty(jsonURL))
         jsonURL = $('link[rel="alternate"][type="application/json"]').attr('href');
       var resourceURL = FBE.extractResourceUrl();
       if (FBE.isEmpty(resourceURL)) {
-        deactivateEditButton();
+        FBE.deactivateEditButton();
         return;
-      }
-      //Test Environment Workaround
-      if (location.toString().startsWith('file://') || location.toString().startsWith('http://kdi-student.de') || location.toString().startsWith('http://localhost')) {
-        jsonURL = 'Taucha.json';
-        //resourceURL = 'http://de.dbpedia.org/resource/Taucha';
       }
       if (!FBE.isEmpty(jsonURL)) {
         $.get(jsonURL)
@@ -196,7 +192,7 @@
           })
           .fail((jqxhr, textStatus, error) => {
             FBE.userfeedback('What the ...?', 'Something went terribly wrong! I am sorry, but you can not send us feedback...', 'error', false);
-            deactivateEditButton();
+            FBE.deactivateEditButton();
             console.log(textStatus + ' ' + error);
           });
       } else {
@@ -213,7 +209,7 @@
           })
           .fail((jqxhr, textStatus, error) => {
             FBE.userfeedback('What the ...?', 'Something went terribly wrong! I am sorry, but you can not send us feedback...', 'error', false);
-            deactivateEditButton();
+            FBE.deactivateEditButton();
             console.log(textStatus + ' ' + error);
           });
       }
@@ -412,9 +408,9 @@
 
     pingSemanticPingbackService: function(hash, subject) {
       var ping = {
-        source: encodeURI(subject),
-        target: encodeURI(FBE.ressourceNamespace + FBE.ressourceName),
-        comment: encodeURI(hash + ' at ' + (new Date()).toString())
+        source: subject,
+        target: FBE.ressourceNamespace + FBE.ressourceName,
+        comment: hash + ' at ' + (new Date()).toString()
       };
 
       //TODO show rödelndes zeichen
@@ -427,10 +423,14 @@
           cache: false
         })
         .done(() => {
-          FBE.userfeedback('Hell yeah!', 'You have done a great Job! We have sent your changes to our Mastermind.', 'success', false);
+          FBE.userfeedback('Thank you!', 'You have done a great Job! We have sent your changes to our Mastermind.', 'success', false);
         })
         .fail((jqxhr, textStatus, error) => {
+          console.log("error is:");
           console.log(textStatus + ' ' + error);
+          console.log(textStatus);
+          console.log(error);
+          console.log(jqxhr);
           FBE.userfeedback('What the ...?', 'Some strange error occured! We are sorry, that is our fault.... Please try again later!', 'error', true);
         })
         .always(() => {
@@ -517,7 +517,7 @@
         literal = '"' + temp.replace(/"/g, "\\\"") + '"';
         //escape line breaks
         literal = literal.replace(/(\r\n|\n|\r)/gm, '\\n');
-      } else if (literal.contains('"^^<')) {
+      } else if (literal.includes('"^^<')) {
         console.log('literal with datatype');
         var temp = literal.substr(1, literal.indexOf('"^^<') - 1);
         //escape line breaks
@@ -589,18 +589,6 @@
 
   //FIXME Adding Libs like this into global scope is a very bad practice!!!!!!!
   function jqueryReady() {
-    // now we can use JQuery
-    //TODO validate for success
-    var styles = '<link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">' +
-      //'<link rel="stylesheet" type="text/css" href="prefixed_bootstrap.css">' +
-      '<link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">' +
-      '<link rel="stylesheet" type="text/css" href="https://cdn.rawgit.com/lipis/bootstrap-sweetalert/master/lib/sweet-alert.css">';
-    $('head').append(styles);
-    $.getScript("https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js");
-    //$.getScript("bootstrap.js");
-    //$.get("./custom_bootstrap.min.js");
-    $.getScript("http://point-at-infinity.org/jssha256/jssha256.js");
-    $.getScript("https://cdn.rawgit.com/lipis/bootstrap-sweetalert/master/lib/sweet-alert.min.js"); //*/
     $('head').after('<style> #feedbackButton { position: fixed; bottom: 30px; right: 30px; z-index: 1; width: 80px; height: 80px; font-size: 1em; color: #fff; background: #2C98DE; border: none; border-radius: 50%; box-shadow: 0 3px 6px rgba(0,0,0,.275); outline: none; margin: auto;}</style>');
     FBE.addFeedbackButton();
   }

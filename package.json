@@ -17,8 +17,8 @@
     "countLOC": "sloc -f cli-table -k total,source,comment,empty -e node_modules ./",
     "countLOC:details": "sloc -f cli-table -d -e node_modules ./",
     "preminify:js": "babel --plugins transform-es2015-arrow-functions ./FBE.js --out-file FBE.es5.js",
-    "minify:js": "uglifyjs ./libs/custom_bootstrap.min.js ./node_modules/bootstrap-sweetalert/lib/sweet-alert.min.js ./libs/jssha256.js FBE.es5.js --compress --screw-ie8 -o ./combined.min.js && rm -f FBE.es5.js FBE.es5.js.map",
-    "minify:css": "cleancss ./libs/prefixed_bootstrap.css ./node_modules/bootstrap-sweetalert/lib/sweet-alert.css -o ./combined.min.css"
+    "minify:js": "uglifyjs ./node_modules/bootstrap-sweetalert/lib/sweet-alert.min.js ./libs/jssha256.js FBE.es5.js --compress --screw-ie8 -o ./combined.min.js && rm -f FBE.es5.js FBE.es5.js.map",
+    "minify:css": "cleancss ./node_modules/bootstrap-sweetalert/lib/sweet-alert.css -o ./combined.min.css"
   },
   "dependencies": {
     "bootstrap-sweetalert": "^0.4.2"
@@ -30,7 +30,7 @@
     "babel-cli": "^6.5.1",
     "babel-plugin-transform-es2015-arrow-functions": "^6.5.2",
     "clean-css": "^3.4.9",
-    "eslint": "^1.10.3",
+    "eslint": "^5.9.0",
     "pushstate-server": "^1.8.1",
     "sloc": "^0.1.10",
     "uglify-js": "^2.6.1"
